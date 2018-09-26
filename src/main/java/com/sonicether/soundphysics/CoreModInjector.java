@@ -35,16 +35,6 @@ public class CoreModInjector implements IClassTransformer {
 		if (obfuscated.equals("chm")) {
 			// Inside SoundManager
 			InsnList toInject = new InsnList();
-			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSound", "(Lnet/minecraft/client/audio/ISound;)V", false));
-
-			// Target method: playSound
-			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setVolume", null, toInject, false, 0, 0, false, 0);
-			
-			toInject = new InsnList();
-
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 7));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 					"setLastSoundCategory", "(Lqg;)V", false));

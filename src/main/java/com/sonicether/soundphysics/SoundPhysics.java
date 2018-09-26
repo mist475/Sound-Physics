@@ -81,7 +81,6 @@ public class SoundPhysics {
 
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
-	private static ISound lastSound;
 
 	private static ProcThread proc_thread;
 	private static boolean thread_alive;
@@ -114,19 +113,17 @@ public class SoundPhysics {
 		public static float posZ;
 		public static SoundCategory category;
 		public static String name;
-		public static ISound sound;
 		public static int frequency;
 		public static int size;
 		public static int bufferID;
 
-		public Source(int sid,float px,float py,float pz,SoundCategory cat,String n,ISound is) {
+		public Source(int sid,float px,float py,float pz,SoundCategory cat,String n) {
 			this.sourceID = sid;
 			this.posX = px;
 			this.posY = py;
 			this.posZ = pz;
 			this.category = cat;
 			this.name = n;
-			this.sound = is;
 			bufferID = AL10.alGetSourcei(sid, AL10.AL_BUFFER);
 			size = AL10.alGetBufferi(bufferID, AL10.AL_SIZE);
 			frequency = AL10.alGetBufferi(bufferID, AL10.AL_FREQUENCY);
@@ -158,17 +155,6 @@ public class SoundPhysics {
 						//int byteoff = AL10.alGetSourcei(source.sourceID, AL11.AL_BYTE_OFFSET);
 						//boolean finished = source.size == byteoff;
 						if (state == AL10.AL_PLAYING) {
-							/*float x = source.sound.getXPosF();
-							float y = source.sound.getYPosF();
-							float z = source.sound.getZPosF();
-							if (x != source.posX || y != source.posY || z != source.posZ) {
-								log("Sound changed position");
-								log("OLD:"+String.valueOf(source.posX)+","+String.valueOf(source.posY)+","+String.valueOf(source.posZ));
-								log("NEW:"+String.valueOf(x)+","+String.valueOf(y)+","+String.valueOf(z));
-							}*/
-							/*source.posX = source.sound.getXPosF();//x;
-							source.posY = source.sound.getYPosF();//y;
-							source.posZ = source.sound.getZPosF();//z;*/
 							FloatBuffer pos = BufferUtils.createFloatBuffer(3);
 							AL10.alGetSource(source.sourceID,AL10.AL_POSITION,pos);
 							source.posX = pos.get(0);
@@ -194,7 +180,8 @@ public class SoundPhysics {
 		ListIterator<Source> iter = source_list.listIterator();
 			while (iter.hasNext()) {
 				Source sn = iter.next();
-				if (sn.sourceID == s.sourceID && sn.sound == s.sound && sn.bufferID == s.bufferID) {
+				if (sn.sourceID == s.sourceID && sn.bufferID == s.bufferID &&
+					sn.posX == s.posX && sn.posY == s.posY && sn.posZ == s.posZ) {
 					return true;
 				}
 			}
@@ -338,21 +325,13 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void setLastSound(final ISound sound)
-	{
-		lastSound = sound;
-	}
-
-	/**
-	 * CALLED BY ASM INJECTED CODE!
-	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
 		evaluateEnvironment(sourceID, posX, posY, posZ,lastSoundCategory,lastSoundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
 		if (((mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS 
 		| lastSoundCategory == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(lastSoundName).matches()))) return;
-		Source tmp = new Source(sourceID,posX,posY,posZ,lastSoundCategory,lastSoundName,lastSound);
+		Source tmp = new Source(sourceID,posX,posY,posZ,lastSoundCategory,lastSoundName);
 		if (source_check(tmp)) return;
 		source_list.add(tmp);
 	}
