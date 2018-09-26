@@ -35,6 +35,15 @@ public class CoreModInjector implements IClassTransformer {
 		if (obfuscated.equals("chm")) {
 			// Inside SoundManager
 			InsnList toInject = new InsnList();
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"setLastSound", "(Lnet/minecraft/client/audio/ISound;)V", false));
+
+			// Target method: playSound
+			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "setVolume", null, toInject, false, 0, 0, false, 0);
+			
+			toInject = new InsnList();
 
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 7));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
@@ -141,6 +150,27 @@ public class CoreModInjector implements IClassTransformer {
 			// Inside target method, target node: Entity/getSoundCategory
 			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Lqe;FF)V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "bK", null, toInject, true, 0, 0, false, -3);
+		} else
+		// Fix for computronics's sound card and tape drive
+		if (obfuscated.equals("pl.asie.lib.audio.StreamingAudioPlayer")) {
+			// Inside StreamingAudioPlayer
+			InsnList toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 2));
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 3));
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 4));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 8));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/lib/audio/StreamingAudioPlayer$SourceEntry", "src",
+					"Ljava/nio/IntBuffer;"));
+			toInject.add(new InsnNode(Opcodes.ICONST_0));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/IntBuffer", "get", "(I)I", false));
+
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"onPlaySound", "(FFFI)V", false));
+
+			// Target method: play 
+			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Ljava/lang/String;FFFF)V", Opcodes.INVOKESTATIC,
+					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, toInject, false, 0, 0, false, 0);
 		}
 
 		return bytes;
@@ -161,13 +191,12 @@ public class CoreModInjector implements IClassTransformer {
 			final MethodNode m = methodIterator.next();
 
 			if (m.name.equals(targetMethod) && m.desc.equals(targetMethodSignature)) {
-
 				AbstractInsnNode targetNode = null;
 
 				final ListIterator<AbstractInsnNode> nodeIterator = m.instructions.iterator();
 				while (nodeIterator.hasNext()) {
 					AbstractInsnNode currentNode = nodeIterator.next();
-
+					
 					if (currentNode.getOpcode() == targetNodeOpcode) {
 
 						if (targetNodeType == AbstractInsnNode.METHOD_INSN) {

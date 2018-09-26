@@ -1,6 +1,11 @@
 package com.sonicether.soundphysics;
 
 import java.util.regex.Pattern;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.ListIterator;
+import java.util.Collections;
+import java.nio.FloatBuffer;
 
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -8,6 +13,7 @@ import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.ALCcontext;
 import org.lwjgl.openal.ALCdevice;
 import org.lwjgl.openal.EFX10;
+import org.lwjgl.BufferUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -21,10 +27,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.Text;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import paulscode.sound.SoundSystemConfig;
+
+import org.objectweb.asm.Type;
 
 @Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
 public class SoundPhysics {
@@ -64,8 +77,15 @@ public class SoundPhysics {
 
 	private static Minecraft mc;
 
+	private static SoundHandler sndHandler;
+
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
+	private static ISound lastSound;
+
+	private static ProcThread proc_thread;
+	private static boolean thread_alive;
+	private static List<Source> source_list;
 
 	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
 	// NOT REMOVE!
@@ -81,6 +101,146 @@ public class SoundPhysics {
 	public static void init() {
 		setupEFX();
 		mc = Minecraft.getMinecraft();
+		sndHandler = mc.getSoundHandler();
+		setupThread();
+		//System.out.println("---------------------------------");
+		//System.out.println(Type.getMethodDescriptor(Type.getType(void.class),Type.getType(String.class),Type.getType(Float.class),Type.getType(Float.class),Type.getType(Float.class),Type.getType(Float.class)));
+	}
+
+	public static class Source {
+		public static int sourceID;
+		public static float posX;
+		public static float posY;
+		public static float posZ;
+		public static SoundCategory category;
+		public static String name;
+		public static ISound sound;
+		public static int frequency;
+		public static int size;
+		public static int bufferID;
+
+		public Source(int sid,float px,float py,float pz,SoundCategory cat,String n,ISound is) {
+			this.sourceID = sid;
+			this.posX = px;
+			this.posY = py;
+			this.posZ = pz;
+			this.category = cat;
+			this.name = n;
+			this.sound = is;
+			bufferID = AL10.alGetSourcei(sid, AL10.AL_BUFFER);
+			size = AL10.alGetBufferi(bufferID, AL10.AL_SIZE);
+			frequency = AL10.alGetBufferi(bufferID, AL10.AL_FREQUENCY);
+		}
+	}
+
+	public static class ProcThread extends Thread {
+		@Override
+		public void run() {
+			while (thread_alive) {
+				while (!Config.dynamicEnvironementEvalutaion) {
+					try {
+						Thread.sleep(1000);
+					} catch (Exception e) {
+						logError(String.valueOf(e));
+					}
+				}
+				synchronized (source_list) {
+					//log("Updating env " + String.valueOf(source_list.size()));
+					ListIterator<Source> iter = source_list.listIterator();
+					while (iter.hasNext()) {
+						Source source = iter.next();
+						//log("Updating sound '" + source.name + "' SourceID:" + String.valueOf(source.sourceID));
+						//boolean pl = sndHandler.isSoundPlaying(source.sound);
+						//FloatBuffer pos = BufferUtils.createFloatBuffer(3);
+						//AL10.alGetSource(source.sourceID,AL10.AL_POSITION,pos);
+						//To try ^
+						int state = AL10.alGetSourcei(source.sourceID, AL10.AL_SOURCE_STATE);
+						//int byteoff = AL10.alGetSourcei(source.sourceID, AL11.AL_BYTE_OFFSET);
+						//boolean finished = source.size == byteoff;
+						if (state == AL10.AL_PLAYING) {
+							/*float x = source.sound.getXPosF();
+							float y = source.sound.getYPosF();
+							float z = source.sound.getZPosF();
+							if (x != source.posX || y != source.posY || z != source.posZ) {
+								log("Sound changed position");
+								log("OLD:"+String.valueOf(source.posX)+","+String.valueOf(source.posY)+","+String.valueOf(source.posZ));
+								log("NEW:"+String.valueOf(x)+","+String.valueOf(y)+","+String.valueOf(z));
+							}*/
+							/*source.posX = source.sound.getXPosF();//x;
+							source.posY = source.sound.getYPosF();//y;
+							source.posZ = source.sound.getZPosF();//z;*/
+							FloatBuffer pos = BufferUtils.createFloatBuffer(3);
+							AL10.alGetSource(source.sourceID,AL10.AL_POSITION,pos);
+							source.posX = pos.get(0);
+							source.posY = pos.get(1);
+							source.posZ = pos.get(2);
+							evaluateEnvironment(source.sourceID,source.posX,source.posY,source.posZ,source.category,source.name);
+						} else if (state == AL10.AL_STOPPED) {
+							iter.remove();
+						}
+					}
+				}
+				try {
+					Thread.sleep(1000/Config.dynamicEnvironementEvalutaionFrequency);
+				} catch (Exception e) {
+					logError(String.valueOf(e));
+				}
+			}
+		}
+	}
+
+	public static boolean source_check(Source s) {
+		synchronized (source_list) {
+		ListIterator<Source> iter = source_list.listIterator();
+			while (iter.hasNext()) {
+				Source sn = iter.next();
+				if (sn.sourceID == s.sourceID && sn.sound == s.sound && sn.bufferID == s.bufferID) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	@Mod.EventBusSubscriber
+	public static class DebugDisplayEventHandler {
+		@SubscribeEvent
+		public static void onDebugOverlay(RenderGameOverlayEvent.Text event)
+		{
+			if(mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion) {
+				event.getLeft().add("");
+				event.getLeft().add("[SoundPhysics] "+String.valueOf(source_list.size())+" Sources");
+				event.getLeft().add("[SoundPhysics] Source list :");
+				synchronized (source_list) {
+					ListIterator<Source> iter = source_list.listIterator();
+					while (iter.hasNext())  {
+						Source s = iter.next();
+						event.getLeft().add(String.valueOf(s.sourceID)+"-"+String.valueOf(s.posX)+","+String.valueOf(s.posY)+","+String.valueOf(s.posZ));
+						int buffq = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_QUEUED);
+						int buffp = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_PROCESSED);
+						int sampoff = AL10.alGetSourcei(s.sourceID, AL11.AL_SAMPLE_OFFSET);
+						int byteoff = AL10.alGetSourcei(s.sourceID, AL11.AL_BYTE_OFFSET);
+						String k = "";
+						if (sampoff!=0) {
+							//k = String.valueOf(sampoff)+"/"+String.valueOf((byteoff/sampoff)*size)+" ";
+							k = String.valueOf((float)sampoff/(float)s.frequency)+"/"+String.valueOf((float)((byteoff/sampoff)*s.size)/(float)s.frequency)+" ";
+						} else {
+							k = "0/? ";
+						}
+						event.getLeft().add(k+String.valueOf(buffp)+"/"+String.valueOf(buffq)+" "+String.valueOf(s.bufferID));
+						event.getLeft().add("----");
+					}
+				}
+			}
+		}
+	}
+
+	private static void setupThread() {
+		thread_alive = false;
+		source_list = Collections.synchronizedList(new ArrayList<Source>());
+		proc_thread = new ProcThread();
+		thread_alive = true;
+		proc_thread.start();
 	}
 
 	public static void applyConfigChanges() {
@@ -178,8 +338,23 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
+	public static void setLastSound(final ISound sound)
+	{
+		lastSound = sound;
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
-		evaluateEnvironment(sourceID, posX, posY, posZ);
+		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
+		evaluateEnvironment(sourceID, posX, posY, posZ,lastSoundCategory,lastSoundName);
+		if (!Config.dynamicEnvironementEvalutaion) return;
+		if (((mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS 
+		| lastSoundCategory == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(lastSoundName).matches()))) return;
+		Source tmp = new Source(sourceID,posX,posY,posZ,lastSoundCategory,lastSoundName,lastSound);
+		if (source_check(tmp)) return;
+		source_list.add(tmp);
 	}
 
 	/**
@@ -282,16 +457,16 @@ public class SoundPhysics {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ) {
-		if (mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS
-				| lastSoundCategory == SoundCategory.MUSIC) {
+	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ, final SoundCategory category, final String name) {
+		if (mc.player == null | mc.world == null | posY <= 0 | category == SoundCategory.RECORDS
+				| category == SoundCategory.MUSIC) {
 			// posY <= 0 as a condition has to be there: Ingame
 			// menu clicks do have a player and world present
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
 
-		final boolean isRain = rainPattern.matcher(lastSoundName).matches();
+		final boolean isRain = rainPattern.matcher(name).matches();
 
 		if (Config.skipRainOcclusionTracing && isRain) {
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -302,7 +477,7 @@ public class SoundPhysics {
 		final float absorptionCoeff = Config.globalBlockAbsorption * 3.0f;
 
 		final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
-		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, lastSoundName, lastSoundCategory);
+		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, name, category);
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
 		Vec3d rayOrigin = soundPos;
@@ -361,7 +536,7 @@ public class SoundPhysics {
 		final float maxDistance = 256.0f;
 
 		final int numRays = Config.environmentEvaluationRays;
-		final int rayBounces = 4;
+		final int rayBounces = Config.environmentEvaluationRaysBounces;
 
 		final float[] bounceReflectivityRatio = new float[rayBounces];
 
