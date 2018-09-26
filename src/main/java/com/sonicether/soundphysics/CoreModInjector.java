@@ -191,12 +191,12 @@ public class CoreModInjector implements IClassTransformer {
 			final MethodNode m = methodIterator.next();
 
 			if (m.name.equals(targetMethod) && m.desc.equals(targetMethodSignature)) {
+				
 				AbstractInsnNode targetNode = null;
 
 				final ListIterator<AbstractInsnNode> nodeIterator = m.instructions.iterator();
 				while (nodeIterator.hasNext()) {
 					AbstractInsnNode currentNode = nodeIterator.next();
-					
 					if (currentNode.getOpcode() == targetNodeOpcode) {
 
 						if (targetNodeType == AbstractInsnNode.METHOD_INSN) {
