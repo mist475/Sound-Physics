@@ -36,6 +36,9 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Text;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import paulscode.sound.SoundSystemConfig;
+import paulscode.sound.SoundBuffer;
+import javax.sound.sampled.AudioFormat;
+import java.nio.ByteBuffer;
 
 import org.objectweb.asm.Type;
 
@@ -102,8 +105,11 @@ public class SoundPhysics {
 		mc = Minecraft.getMinecraft();
 		sndHandler = mc.getSoundHandler();
 		setupThread();
-		//System.out.println("---------------------------------");
-		//System.out.println(Type.getMethodDescriptor(Type.getType(void.class),Type.getType(String.class),Type.getType(Float.class),Type.getType(Float.class),Type.getType(Float.class),Type.getType(Float.class)));
+		//System.out.println("---------------------------------"); 
+		//System.out.println(Type.getMethodDescriptor(Type.getType(boolean.class),Type.getType(FilenameURL.class)));
+		//System.out.println(Type.getMethodDescriptor(Type.getType(void.class),Type.getType(SoundBuffer.class)));
+		//System.out.println(Type.getMethodDescriptor(Type.getType(SoundBuffer.class),Type.getType(SoundBuffer.class)));
+
 	}
 
 	public static class Source {
@@ -187,6 +193,47 @@ public class SoundPhysics {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static SoundBuffer onLoadSound(SoundBuffer buff) {
+		if (buff == null || buff.audioFormat.getChannels() == 1) return buff;
+		AudioFormat orignalformat = buff.audioFormat;
+		int bits = orignalformat.getSampleSizeInBits();
+		boolean bigendian = orignalformat.isBigEndian();
+		AudioFormat monoformat = new AudioFormat(orignalformat.getEncoding(), orignalformat.getSampleRate(), bits,
+												1, orignalformat.getFrameSize(), orignalformat.getFrameRate(), bigendian);
+		log("Converting sound ("+orignalformat.toString()+") to mono ("+monoformat.toString()+")");
+		byte[] monodata = null;
+		if (bits == 8) {
+			//monodata = new byte[buff.audioData.length/2];
+			for (int i = 0; i < buff.audioData.length; i+=2) {
+				buff.audioData[i/2] = (byte)((buff.audioData[i]+buff.audioData[i+1])/2);
+			}
+		} else if (bits == 16) {
+			//monodata = new byte[buff.audioData.length/4];
+			for (int i = 0; i < buff.audioData.length; i+=4) {
+				int lsamp = 0;
+				int rsamp = 0;
+				if (bigendian) {
+					lsamp = buff.audioData[i+1] | (buff.audioData[i]<<8);
+					rsamp = buff.audioData[(i+2)+1] | (buff.audioData[(i+2)]<<8);
+				} else {
+					lsamp = buff.audioData[i] | (buff.audioData[i+1]<<8);
+					rsamp = buff.audioData[(i+2)] | (buff.audioData[(i+2)+1]<<8);
+				}
+				buff.audioData[i/4] = (byte)((lsamp+rsamp)/2);
+			}
+		}
+		if (monodata == null) {
+			log("Conversion of sound failed?");
+			return buff;
+		} else { 
+			log("Finished conversion of sound");
+			return new SoundBuffer(monodata, monoformat);
+		}
 	}
 
 	@Mod.EventBusSubscriber

@@ -95,6 +95,23 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.METHOD_INSN, "play", null, toInject, false, 0, 0, false, 0);
 		} else
 
+		// Convert stero sounds to mono
+		if (obfuscated.equals("paulscode.sound.libraries.LibraryLWJGLOpenAL")) {
+			// Inside LibraryLWJGLOpenAL
+			InsnList toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 4));
+
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"onLoadSound", "(Lpaulscode/sound/SoundBuffer;)Lpaulscode/sound/SoundBuffer;", false));
+
+			toInject.add(new VarInsnNode(Opcodes.ASTORE, 4));
+
+			// Target method: loadSound 
+			bytes = patchMethodInClass(obfuscated, bytes, "loadSound", "(Lpaulscode/sound/FilenameURL;)Z", Opcodes.INVOKEINTERFACE,
+					AbstractInsnNode.METHOD_INSN, "cleanup", null, toInject, false, 0, 0, false, 0);
+		} else
+
 		if (obfuscated.equals("paulscode.sound.SoundSystem")) {
 			// Inside SoundSystem
 			InsnList toInject = new InsnList();
@@ -141,6 +158,7 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Lqe;FF)V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "bK", null, toInject, true, 0, 0, false, -3);
 		} else
+
 		// Fix for computronics's sound card and tape drive
 		if (obfuscated.equals("pl.asie.lib.audio.StreamingAudioPlayer")) {
 			// Inside StreamingAudioPlayer
@@ -162,6 +180,7 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Ljava/lang/String;FFFF)V", Opcodes.INVOKESTATIC,
 					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, toInject, false, 0, 0, false, 0);
 		}
+		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
 
 		return bytes;
 	}
