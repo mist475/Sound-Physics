@@ -53,6 +53,8 @@ public class SoundPhysics {
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
 	private static final Pattern stepPattern = Pattern.compile(".*step.*");
 	private static final Pattern blockPattern = Pattern.compile(".*block.*");
+	private static final Pattern uiPattern = Pattern.compile(".*ui.*");
+	private static final Pattern clickPattern = Pattern.compile(".*random.click.*");
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
@@ -349,7 +351,7 @@ public class SoundPhysics {
 	public static SoundBuffer onLoadSound(SoundBuffer buff, String filename) {
 		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
 		if (mc.player == null | mc.world == null | lastSoundCategory == SoundCategory.RECORDS 
-		| lastSoundCategory == SoundCategory.MUSIC) {
+		| lastSoundCategory == SoundCategory.MUSIC | uiPattern.matcher(filename).matches() | clickPattern.matcher(filename).matches()) {
 			if (Config.autoSteroDownmixDebug) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
 			return buff;
 		}
