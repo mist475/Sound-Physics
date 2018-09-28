@@ -124,7 +124,7 @@ public class Config {
 		simplerSharedAirspaceSimulation = this.forgeConfig.getBoolean("Simpler Shared Airspace Simulation",
 				categoryPerformance, false,
 				"If true, enables a simpler technique for determining when the player and a sound source share airspace. Might sometimes miss recognizing shared airspace, but it's faster to calculate.");
-		dynamicEnvironementEvalutaion = this.forgeConfig.getBoolean("Dynamic environment evaluation", categoryPerformance, true,
+		dynamicEnvironementEvalutaion = this.forgeConfig.getBoolean("Dynamic environment evaluation", categoryPerformance, false,
 				"WARNING it's implemented really badly so i'd recommend not always using it.If true, the environment will keep getting evaluated for every sound that is currently playing. This may affect performance");
 		dynamicEnvironementEvalutaionFrequency = this.forgeConfig.getInt("Frequency of environment evaluation", categoryPerformance, 30, 1, 60,
 				"The frequency at witch to update environment of sounds if dynamic environment evaluation is enabled");
