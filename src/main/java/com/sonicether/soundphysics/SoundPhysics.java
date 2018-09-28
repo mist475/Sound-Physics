@@ -39,6 +39,7 @@ import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundBuffer;
 import javax.sound.sampled.AudioFormat;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import org.objectweb.asm.Type;
 
@@ -195,47 +196,6 @@ public class SoundPhysics {
 		return false;
 	}
 
-	/**
-	 * CALLED BY ASM INJECTED CODE!
-	 */
-	public static SoundBuffer onLoadSound(SoundBuffer buff) {
-		if (buff == null || buff.audioFormat.getChannels() == 1) return buff;
-		AudioFormat orignalformat = buff.audioFormat;
-		int bits = orignalformat.getSampleSizeInBits();
-		boolean bigendian = orignalformat.isBigEndian();
-		AudioFormat monoformat = new AudioFormat(orignalformat.getEncoding(), orignalformat.getSampleRate(), bits,
-												1, orignalformat.getFrameSize(), orignalformat.getFrameRate(), bigendian);
-		log("Converting sound ("+orignalformat.toString()+") to mono ("+monoformat.toString()+")");
-		byte[] monodata = null;
-		if (bits == 8) {
-			//monodata = new byte[buff.audioData.length/2];
-			for (int i = 0; i < buff.audioData.length; i+=2) {
-				buff.audioData[i/2] = (byte)((buff.audioData[i]+buff.audioData[i+1])/2);
-			}
-		} else if (bits == 16) {
-			//monodata = new byte[buff.audioData.length/4];
-			for (int i = 0; i < buff.audioData.length; i+=4) {
-				int lsamp = 0;
-				int rsamp = 0;
-				if (bigendian) {
-					lsamp = buff.audioData[i+1] | (buff.audioData[i]<<8);
-					rsamp = buff.audioData[(i+2)+1] | (buff.audioData[(i+2)]<<8);
-				} else {
-					lsamp = buff.audioData[i] | (buff.audioData[i+1]<<8);
-					rsamp = buff.audioData[(i+2)] | (buff.audioData[(i+2)+1]<<8);
-				}
-				buff.audioData[i/4] = (byte)((lsamp+rsamp)/2);
-			}
-		}
-		if (monodata == null) {
-			log("Conversion of sound failed?");
-			return buff;
-		} else { 
-			log("Finished conversion of sound");
-			return new SoundBuffer(monodata, monoformat);
-		}
-	}
-
 	@Mod.EventBusSubscriber
 	public static class DebugDisplayEventHandler {
 		@SubscribeEvent
@@ -376,11 +336,44 @@ public class SoundPhysics {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
 		evaluateEnvironment(sourceID, posX, posY, posZ,lastSoundCategory,lastSoundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
-		if (((mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS 
-		| lastSoundCategory == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(lastSoundName).matches()))) return;
+		if ((mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS 
+		| lastSoundCategory == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(lastSoundName).matches())) return;
 		Source tmp = new Source(sourceID,posX,posY,posZ,lastSoundCategory,lastSoundName);
 		if (source_check(tmp)) return;
 		source_list.add(tmp);
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static SoundBuffer onLoadSound(SoundBuffer buff, String filename) {
+		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
+		if (mc.player == null | mc.world == null | lastSoundCategory == SoundCategory.RECORDS 
+		| lastSoundCategory == SoundCategory.MUSIC) {
+			if (Config.autoSteroDownmixDebug) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
+			return buff;
+		}
+		AudioFormat orignalformat = buff.audioFormat;
+		int bits = orignalformat.getSampleSizeInBits();
+		boolean bigendian = orignalformat.isBigEndian();
+		AudioFormat monoformat = new AudioFormat(orignalformat.getEncoding(), orignalformat.getSampleRate(), bits,
+												1, orignalformat.getFrameSize(), orignalformat.getFrameRate(), bigendian);
+		if (Config.autoSteroDownmixDebug) log("Converting sound '"+filename+"'("+orignalformat.toString()+") to mono ("+monoformat.toString()+")");
+
+		ByteBuffer bb = ByteBuffer.wrap(buff.audioData,0,buff.audioData.length);
+		bb.order(bigendian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
+		if (bits == 8) {
+			for (int i = 0; i < buff.audioData.length; i+=2) {
+				bb.put(i/2,(byte)((bb.get(i)+bb.get(i+1))/2));
+			}
+		} else if (bits == 16) {
+			for (int i = 0; i < buff.audioData.length; i+=4) {
+				bb.putShort((i/2),(short)((bb.getShort(i)+bb.getShort(i+2))/2));
+			}
+		}
+		buff.audioFormat = monoformat;
+		buff.trimData(buff.audioData.length/2);
+		return buff;
 	}
 
 	/**

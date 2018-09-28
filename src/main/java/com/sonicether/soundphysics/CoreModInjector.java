@@ -96,20 +96,37 @@ public class CoreModInjector implements IClassTransformer {
 		} else
 
 		// Convert stero sounds to mono
-		if (obfuscated.equals("paulscode.sound.libraries.LibraryLWJGLOpenAL")) {
+		if (obfuscated.equals("paulscode.sound.libraries.LibraryLWJGLOpenAL") && Config.autoSteroDownmix) {
 			// Inside LibraryLWJGLOpenAL
 			InsnList toInject = new InsnList();
 
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 4));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "paulscode/sound/FilenameURL", "getFilename", "()Ljava/lang/String;", false));
 
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"onLoadSound", "(Lpaulscode/sound/SoundBuffer;)Lpaulscode/sound/SoundBuffer;", false));
+					"onLoadSound", "(Lpaulscode/sound/SoundBuffer;Ljava/lang/String;)Lpaulscode/sound/SoundBuffer;", false));
 
 			toInject.add(new VarInsnNode(Opcodes.ASTORE, 4));
+			//buffer = onLoadSound(SoundPhysics.buffer,filenameURL.getFilename());
 
 			// Target method: loadSound 
 			bytes = patchMethodInClass(obfuscated, bytes, "loadSound", "(Lpaulscode/sound/FilenameURL;)Z", Opcodes.INVOKEINTERFACE,
 					AbstractInsnNode.METHOD_INSN, "cleanup", null, toInject, false, 0, 0, false, 0);
+
+			toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"onLoadSound", "(Lpaulscode/sound/SoundBuffer;Ljava/lang/String;)Lpaulscode/sound/SoundBuffer;", false));
+
+			toInject.add(new VarInsnNode(Opcodes.ASTORE, 0));
+
+			// Target method: loadSound 
+			bytes = patchMethodInClass(obfuscated, bytes, "loadSound", "(Lpaulscode/sound/SoundBuffer;Ljava/lang/String;)Z", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "getChannels", null, toInject, true, 0, 0, false, -12);
 		} else
 
 		if (obfuscated.equals("paulscode.sound.SoundSystem")) {
@@ -160,7 +177,7 @@ public class CoreModInjector implements IClassTransformer {
 		} else
 
 		// Fix for computronics's sound card and tape drive
-		if (obfuscated.equals("pl.asie.lib.audio.StreamingAudioPlayer")) {
+		if (obfuscated.equals("pl.asie.lib.audio.StreamingAudioPlayer") && Config.computronicsPatching) {
 			// Inside StreamingAudioPlayer
 			InsnList toInject = new InsnList();
 

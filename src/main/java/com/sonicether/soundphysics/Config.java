@@ -46,9 +46,15 @@ public class Config {
 	public static float sandReflectivity;
 	public static float snowReflectivity;
 
+	//Compatibility
+	public static boolean computronicsPatching;
+	public static boolean autoSteroDownmix;
+	public static boolean autoSteroDownmixDebug;
+
 	private static final String categoryGeneral = "General";
 	private static final String categoryPerformance = "Performance";
 	private static final String categoryMaterialProperties = "Material properties";
+	private static final String categoryCompatibility = "Compatibility";
 
 	static {
 		instance = new Config();
@@ -79,6 +85,7 @@ public class Config {
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryGeneral)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryPerformance)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMaterialProperties)));
+		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryCompatibility)));
 
 		return list;
 	}
@@ -141,6 +148,14 @@ public class Config {
 				"Sound reflectivity for sand blocks.");
 		snowReflectivity = this.forgeConfig.getFloat("Snow Reflectivity", categoryMaterialProperties, 0.2f, 0.0f, 1.0f,
 				"Sound reflectivity for snow blocks.");
+
+		// compatibility
+		computronicsPatching = this.forgeConfig.getBoolean("Patch Computronics", categoryCompatibility, true,
+				"MAY REQUIRE RESTART.If true, patches the computronics sound sources so it works with sound physics.");
+		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
+				"MAY REQUIRE RESTART.If true, Automatically downmix stereo sounds that are loaded to mono");
+		autoSteroDownmixDebug = this.forgeConfig.getBoolean("Stereo downmix debug", categoryCompatibility, false,
+				"If true, Prints sound name and format of the sounds that get converted");
 
 		if (this.forgeConfig.hasChanged()) {
 			this.forgeConfig.save();
