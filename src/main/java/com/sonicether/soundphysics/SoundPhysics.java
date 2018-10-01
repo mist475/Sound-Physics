@@ -40,6 +40,8 @@ import paulscode.sound.SoundBuffer;
 import javax.sound.sampled.AudioFormat;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Timer;  
+import java.util.TimerTask;
 
 import org.objectweb.asm.Type;
 
@@ -500,6 +502,22 @@ public class SoundPhysics {
 		final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
 		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, name, category);
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
+
+		/*final double distance = playerPos.distanceTo(soundPos);
+		final double time = (distance/343.3)*1000;
+		AL10.alSourcePause(sourceID);
+		log("paused, time "+String.valueOf(time));
+
+		new java.util.Timer().schedule( 
+			new java.util.TimerTask() {
+				@Override
+				public void run() {
+					log("play, time "+String.valueOf(time));
+					AL10.alSourcePlay(sourceID);
+				}
+			}, 
+			(long)time 
+		);*/
 
 		Vec3d rayOrigin = soundPos;
 
