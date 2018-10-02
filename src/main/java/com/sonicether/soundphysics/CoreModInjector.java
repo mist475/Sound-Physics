@@ -191,11 +191,11 @@ public class CoreModInjector implements IClassTransformer {
 			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/nio/IntBuffer", "get", "(I)I", false));
 
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"onPlaySound", "(FFFI)V", false));
+					"onPlaySoundAL", "(FFFI)V", false));
 
 			// Target method: play 
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Ljava/lang/String;FFFF)V", Opcodes.INVOKESTATIC,
-					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, toInject, true, 0, 0, false, -5);
 		}
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
 

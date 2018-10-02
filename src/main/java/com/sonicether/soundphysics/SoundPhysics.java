@@ -336,13 +336,29 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
+	// For sounds that get played normally
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
+		onPlaySound(posX, posY, posZ, sourceID, lastSoundCategory, lastSoundName);
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	// For sounds that get played using OpenAL directly or just not using the minecraft sound system
+	public static void onPlaySoundAL(final float posX, final float posY, final float posZ, final int sourceID) {
+		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.BLOCKS, "null");
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
-		evaluateEnvironment(sourceID, posX, posY, posZ,lastSoundCategory,lastSoundName);
+		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
-		if ((mc.player == null | mc.world == null | posY <= 0 | lastSoundCategory == SoundCategory.RECORDS 
-		| lastSoundCategory == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(lastSoundName).matches())) return;
-		Source tmp = new Source(sourceID,posX,posY,posZ,lastSoundCategory,lastSoundName);
+		if ((mc.player == null | mc.world == null | posY <= 0 | soundCat == SoundCategory.RECORDS 
+		| soundCat == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(soundName).matches())) return;
+		Source tmp = new Source(sourceID,posX,posY,posZ,soundCat,soundName);
 		if (source_check(tmp)) return;
 		source_list.add(tmp);
 	}
