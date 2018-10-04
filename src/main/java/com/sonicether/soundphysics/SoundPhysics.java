@@ -49,7 +49,7 @@ import org.objectweb.asm.Type;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.4";
+	public static final String version = "1.0.5";
 	public static final String mcVersion = "1.12.2";
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
@@ -85,8 +85,6 @@ public class SoundPhysics {
 
 	private static Minecraft mc;
 
-	private static SoundHandler sndHandler;
-
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
 
@@ -108,7 +106,6 @@ public class SoundPhysics {
 	public static void init() {
 		setupEFX();
 		mc = Minecraft.getMinecraft();
-		sndHandler = mc.getSoundHandler();
 		setupThread();
 		//System.out.println("---------------------------------"); 
 		//System.out.println(Type.getMethodDescriptor(Type.getType(boolean.class),Type.getType(FilenameURL.class)));
