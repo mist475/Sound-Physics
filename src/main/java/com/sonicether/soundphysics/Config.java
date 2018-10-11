@@ -6,11 +6,11 @@ import java.util.List;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
-import net.minecraftforge.fml.client.config.IConfigElement;
-import net.minecraftforge.fml.client.event.ConfigChangedEvent;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.client.config.IConfigElement;
+import cpw.mods.fml.client.event.ConfigChangedEvent;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class Config {
 
@@ -74,7 +74,7 @@ public class Config {
 
 	@SubscribeEvent
 	public void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-		if (eventArgs.getModID().equals(SoundPhysics.modid)) {
+		if (eventArgs.modID.equals(SoundPhysics.modid)) {
 			syncConfig();
 		}
 	}

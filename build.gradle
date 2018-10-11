@@ -1,36 +1,36 @@
 buildscript {
-	repositories {
-		jcenter()
-		maven { url = "http://files.minecraftforge.net/maven" }
-	}
-	dependencies {
-		classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-	}
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+    }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
-//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
-version = "1.12.2"
+apply plugin: 'forge'
+
+version = "1.7.10"
 group = "com.sonicether.soundphysics"
 archivesBaseName = "Sound-Physics"
+
+minecraft {
+    version = "1.7.10-10.13.4.1614-1.7.10"
+    runDir = "eclipse"
+}
 
 jar {
 	manifest {
 		attributes 'FMLCorePlugin': 'com.sonicether.soundphysics.CoreModLoader'
 		attributes 'FMLCorePluginContainsFMLMod': 'true'
 	}
-}
-
-sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-compileJava {
-	sourceCompatibility = targetCompatibility = '1.8'
-}
-
-minecraft {
-	version = "1.12.2-14.23.4.2765"
-	runDir = "run"
-
-	mappings = "snapshot_20180814"
 }
 
 dependencies {

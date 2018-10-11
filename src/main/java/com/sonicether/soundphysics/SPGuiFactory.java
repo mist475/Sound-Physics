@@ -4,7 +4,7 @@ import java.util.Set;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.fml.client.IModGuiFactory;
+import cpw.mods.fml.client.IModGuiFactory;
 
 public class SPGuiFactory implements IModGuiFactory {
 
@@ -13,13 +13,8 @@ public class SPGuiFactory implements IModGuiFactory {
 	}
 
 	@Override
-	public boolean hasConfigGui() {
-		return true;
-	}
-
-	@Override
-	public GuiScreen createConfigGui(GuiScreen parentScreen) {
-		return new SPGuiConfig(parentScreen);
+	public Class<? extends GuiScreen> mainConfigGuiClass() {
+		return SPGuiConfig.class;
 	}
 
 	@Override
@@ -27,4 +22,8 @@ public class SPGuiFactory implements IModGuiFactory {
 		return null;
 	}
 
+	@Override
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
+		return null;
+	}
 }

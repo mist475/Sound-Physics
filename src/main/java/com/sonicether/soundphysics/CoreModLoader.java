@@ -2,8 +2,8 @@ package com.sonicether.soundphysics;
 
 import java.util.Map;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.MCVersion;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import cpw.mods.fml.relauncher.IFMLLoadingPlugin.MCVersion;
 
 @MCVersion(value = SoundPhysics.mcVersion)
 public class CoreModLoader implements IFMLLoadingPlugin {
