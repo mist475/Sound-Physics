@@ -348,7 +348,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
-		log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
+		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
 		if ((mc.thePlayer == null | mc.theWorld == null | posY <= 0 | soundCat == SoundCategory.RECORDS 
@@ -408,11 +408,11 @@ public class SoundPhysics {
 
 		float reflectivity = 0.5f;
 
-		if (soundType == Block.soundTypeStone) {
+		if (soundType == Block.soundTypeStone || soundType == Block.soundTypePiston) {
 			reflectivity = Config.stoneReflectivity;
 		} else if (soundType == Block.soundTypeWood) {
 			reflectivity = Config.woodReflectivity;
-		} else if (soundType == Block.soundTypeGravel || soundType == Block.soundTypeGrass) {
+		} else if (soundType == Block.soundTypeGravel || soundType == Block.soundTypeGrass || soundType == Block.soundTypeSand) {
 			reflectivity = Config.groundReflectivity;
 		} else if (soundType == Block.soundTypeMetal) {
 			reflectivity = Config.metalReflectivity;
@@ -764,6 +764,8 @@ public class SoundPhysics {
 	private static void setEnvironment(final int sourceID, final float sendGain0, final float sendGain1,
 			final float sendGain2, final float sendGain3, final float sendCutoff0, final float sendCutoff1,
 			final float sendCutoff2, final float sendCutoff3, final float directCutoff, final float directGain) {
+		//log("SID:"+String.valueOf(sourceID)+",("+String.valueOf(sendGain0)+","+String.valueOf(sendCutoff0)+"),("+String.valueOf(sendGain1)+","+String.valueOf(sendCutoff1)
+		//	+"),("+String.valueOf(sendGain2)+","+String.valueOf(sendCutoff2)+"),("+String.valueOf(sendGain3)+","+String.valueOf(sendCutoff3)+"),("+String.valueOf(directGain)+","+String.valueOf(directCutoff)+")");
 		// Set reverb send filter values and set source to send to all reverb fx
 		// slots
 		EFX10.alFilterf(sendFilter0, EFX10.AL_LOWPASS_GAIN, sendGain0);
