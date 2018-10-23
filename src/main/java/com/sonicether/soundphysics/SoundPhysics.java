@@ -406,6 +406,7 @@ public class SoundPhysics {
 	@SuppressWarnings("deprecation")
 	private static float getBlockReflectivity(final Block block) {
 		final Block.SoundType soundType = block.stepSound;
+		final Material blockMaterial = block.getMaterial();
 
 		float reflectivity = 0.5f;
 
@@ -413,8 +414,10 @@ public class SoundPhysics {
 			reflectivity = Config.stoneReflectivity;
 		} else if (soundType == Block.soundTypeWood) {
 			reflectivity = Config.woodReflectivity;
-		} else if (soundType == Block.soundTypeGravel || soundType == Block.soundTypeGrass || soundType == Block.soundTypeSand) {
-			reflectivity = Config.groundReflectivity;
+		} else if (soundType == Block.soundTypeGravel || soundType == Block.soundTypeGrass) {
+			if (blockMaterial == Material.plants || blockMaterial == Material.vine
+				|| blockMaterial == Material.grass || blockMaterial == Material.leaves) reflectivity = Config.plantReflectivity;
+			else reflectivity = Config.groundReflectivity;
 		} else if (soundType == Block.soundTypeMetal) {
 			reflectivity = Config.metalReflectivity;
 		} else if (soundType == Block.soundTypeGlass) {
