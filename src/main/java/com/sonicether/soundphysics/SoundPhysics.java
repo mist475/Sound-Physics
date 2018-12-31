@@ -47,13 +47,13 @@ import org.objectweb.asm.Type;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.5";
 	public static final String mcVersion = "1.7.10";
+	public static final String version = "1.0.5-1";
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
 	private static final Pattern stepPattern = Pattern.compile(".*step.*");
 	private static final Pattern blockPattern = Pattern.compile(".*block.*");
-	private static final Pattern uiPattern = Pattern.compile(".*ui.*");
+	private static final Pattern uiPattern = Pattern.compile(".*\\/ui\\/.*");
 	private static final Pattern clickPattern = Pattern.compile(".*random.click.*");
 
 	@Mod.EventHandler
