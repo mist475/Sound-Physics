@@ -44,11 +44,13 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.METHOD_INSN, "setVolume", null, toInject, false, 0, 0, false, 0);
 
 			toInject = new InsnList();
-			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cgt", "a", "()Lnf;", true));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 4));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "cgq", "a", "()Lnf;", false));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 3));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSoundName", "(Ljava/lang/String;)V", false));
+					"setLastSoundName", "(Ljava/lang/String;Ljava/lang/String;)V", false));
 
 			// Target method: playSound
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,

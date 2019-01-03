@@ -326,8 +326,8 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void setLastSoundName(final String name) {
-		lastSoundName = name;
+	public static void setLastSoundName(final String soundName, final String eventName) {
+		lastSoundName = soundName+"||"+eventName; // Quick hack to check the event and sound name
 	}
 
 	/**
