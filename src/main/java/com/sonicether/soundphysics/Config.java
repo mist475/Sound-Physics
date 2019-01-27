@@ -46,15 +46,20 @@ public class Config {
 	public static float sandReflectivity;
 	public static float snowReflectivity;
 
-	//Compatibility
+	// compatibility
 	public static boolean computronicsPatching;
 	public static boolean autoSteroDownmix;
-	public static boolean autoSteroDownmixDebug;
+	
+	// misc
+	public static boolean autoSteroDownmixLogging;
+	public static boolean debugInfoShow;
+	public static boolean injectorLogging;
 
 	private static final String categoryGeneral = "General";
 	private static final String categoryPerformance = "Performance";
 	private static final String categoryMaterialProperties = "Material properties";
 	private static final String categoryCompatibility = "Compatibility";
+	private static final String categoryMisc = "Misc";
 
 	static {
 		instance = new Config();
@@ -86,6 +91,7 @@ public class Config {
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryPerformance)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMaterialProperties)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryCompatibility)));
+		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMisc)));
 
 		return list;
 	}
@@ -154,8 +160,14 @@ public class Config {
 				"MAY REQUIRE RESTART.If true, patches the computronics sound sources so it works with sound physics.");
 		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
 				"MAY REQUIRE RESTART.If true, Automatically downmix stereo sounds that are loaded to mono");
-		autoSteroDownmixDebug = this.forgeConfig.getBoolean("Stereo downmix debug", categoryCompatibility, false,
+
+		// misc
+		autoSteroDownmixLogging = this.forgeConfig.getBoolean("Stereo downmix Logging", categoryMisc, false,
 				"If true, Prints sound name and format of the sounds that get converted");
+		debugInfoShow = this.forgeConfig.getBoolean("Dynamic env. info in F3", categoryMisc, false,
+				"If true, Shows sources currently playing in the F3 debug info");
+		injectorLogging = this.forgeConfig.getBoolean("Injector Logging", categoryMisc, false,
+				"If true, Logs debug info about the injector");
 
 		if (this.forgeConfig.hasChanged()) {
 			this.forgeConfig.save();

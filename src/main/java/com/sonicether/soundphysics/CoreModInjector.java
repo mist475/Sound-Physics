@@ -19,6 +19,8 @@ import net.minecraft.launchwrapper.IClassTransformer;
 
 public class CoreModInjector implements IClassTransformer {
 
+	private static final String logPrefix = "[SOUND PHYSICS INJECTOR]";
+
 	@Override
 	public byte[] transform(final String obfuscated, final String deobfuscated, byte[] bytes) {
 		if (obfuscated.equals("chm$a")) {
@@ -199,7 +201,6 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Ljava/lang/String;FFFF)V", Opcodes.INVOKESTATIC,
 					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, toInject, true, 0, 0, false, -5);
 		}
-		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
 
 		return bytes;
 	}
@@ -209,6 +210,7 @@ public class CoreModInjector implements IClassTransformer {
 			final String targetInvocationMethodName, final String targetInvocationMethodSignature,
 			final InsnList instructionsToInject, final boolean insertBefore, final int nodesToDeleteBefore,
 			final int nodesToDeleteAfter, final boolean deleteTargetNode, final int targetNodeOffset) {
+		log("Patching class : "+className);	
 
 		final ClassNode classNode = new ClassNode();
 		final ClassReader classReader = new ClassReader(bytes);
@@ -252,7 +254,7 @@ public class CoreModInjector implements IClassTransformer {
 				}
 
 				if (targetNode == null) {
-					SoundPhysics.logError("Target node not found!" + className);
+					logError("Target node not found!" + className);
 					break;
 				}
 
@@ -291,10 +293,18 @@ public class CoreModInjector implements IClassTransformer {
 				break;
 			}
 		}
+		log("Class finished : "+className);
 
 		final ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		classNode.accept(writer);
 		return writer.toByteArray();
 	}
 
+	public static void log(final String message) {
+		if (Config.injectorLogging) System.out.println(logPrefix.concat(" : ").concat(message));
+	}
+
+	public static void logError(final String errorMessage) {
+		System.out.println(logPrefix.concat(" [ERROR] : ").concat(errorMessage));
+	}
 }

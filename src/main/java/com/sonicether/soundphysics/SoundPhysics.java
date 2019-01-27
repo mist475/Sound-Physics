@@ -199,7 +199,7 @@ public class SoundPhysics {
 		@SubscribeEvent
 		public static void onDebugOverlay(RenderGameOverlayEvent.Text event)
 		{
-			if(mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion) {
+			if(mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion && Config.debugInfoShow) {
 				event.getLeft().add("");
 				event.getLeft().add("[SoundPhysics] "+String.valueOf(source_list.size())+" Sources");
 				event.getLeft().add("[SoundPhysics] Source list :");
@@ -370,7 +370,7 @@ public class SoundPhysics {
 		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
 		if (mc.player == null | mc.world == null | lastSoundCategory == SoundCategory.RECORDS 
 		| lastSoundCategory == SoundCategory.MUSIC | uiPattern.matcher(filename).matches() | clickPattern.matcher(filename).matches()) {
-			if (Config.autoSteroDownmixDebug) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
+			if (Config.autoSteroDownmixLogging) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
 			return buff;
 		}
 		AudioFormat orignalformat = buff.audioFormat;
@@ -378,7 +378,7 @@ public class SoundPhysics {
 		boolean bigendian = orignalformat.isBigEndian();
 		AudioFormat monoformat = new AudioFormat(orignalformat.getEncoding(), orignalformat.getSampleRate(), bits,
 												1, orignalformat.getFrameSize(), orignalformat.getFrameRate(), bigendian);
-		if (Config.autoSteroDownmixDebug) log("Converting sound '"+filename+"'("+orignalformat.toString()+") to mono ("+monoformat.toString()+")");
+		if (Config.autoSteroDownmixLogging) log("Converting sound '"+filename+"'("+orignalformat.toString()+") to mono ("+monoformat.toString()+")");
 
 		ByteBuffer bb = ByteBuffer.wrap(buff.audioData,0,buff.audioData.length);
 		bb.order(bigendian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
@@ -831,7 +831,7 @@ public class SoundPhysics {
 	}
 
 	public static void logError(final String errorMessage) {
-		System.out.println(logPrefix.concat(" [ERROR]: ").concat(errorMessage));
+		System.out.println(logPrefix.concat(" [ERROR] : ").concat(errorMessage));
 	}
 
 	protected static boolean checkErrorLog(final String errorMessage) {
