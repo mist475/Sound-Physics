@@ -89,8 +89,9 @@ public class SoundPhysics {
 	private static String lastSoundName;
 
 	private static ProcThread proc_thread;
-	private static boolean thread_alive;
-	private static List<Source> source_list;
+	private static volatile boolean thread_alive;
+	private static volatile boolean thread_signal_death;
+	private static volatile List<Source> source_list;
 
 	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
 	// NOT REMOVE!
@@ -107,23 +108,18 @@ public class SoundPhysics {
 		setupEFX();
 		mc = Minecraft.getMinecraft();
 		setupThread();
-		//System.out.println("---------------------------------"); 
-		//System.out.println(Type.getMethodDescriptor(Type.getType(boolean.class),Type.getType(FilenameURL.class)));
-		//System.out.println(Type.getMethodDescriptor(Type.getType(void.class),Type.getType(SoundBuffer.class)));
-		//System.out.println(Type.getMethodDescriptor(Type.getType(SoundBuffer.class),Type.getType(SoundBuffer.class)));
-
 	}
 
 	public static class Source {
-		public static int sourceID;
-		public static float posX;
-		public static float posY;
-		public static float posZ;
-		public static SoundCategory category;
-		public static String name;
-		public static int frequency;
-		public static int size;
-		public static int bufferID;
+		public int sourceID;
+		public float posX;
+		public float posY;
+		public float posZ;
+		public SoundCategory category;
+		public String name;
+		public int frequency;
+		public int size;
+		public int bufferID;
 
 		public Source(int sid,float px,float py,float pz,SoundCategory cat,String n) {
 			this.sourceID = sid;
@@ -140,7 +136,7 @@ public class SoundPhysics {
 
 	public static class ProcThread extends Thread {
 		@Override
-		public void run() {
+		public synchronized void run() {
 			while (thread_alive) {
 				while (!Config.dynamicEnvironementEvalutaion) {
 					try {
@@ -169,7 +165,7 @@ public class SoundPhysics {
 							source.posY = pos.get(1);
 							source.posZ = pos.get(2);
 							evaluateEnvironment(source.sourceID,source.posX,source.posY,source.posZ,source.category,source.name);
-						} else if (state == AL10.AL_STOPPED) {
+						} else /*if (state == AL10.AL_STOPPED)*/ {
 							iter.remove();
 						}
 					}
@@ -180,12 +176,13 @@ public class SoundPhysics {
 					logError(String.valueOf(e));
 				}
 			}
+			thread_signal_death = true;
 		}
 	}
 
 	public static boolean source_check(Source s) {
 		synchronized (source_list) {
-		ListIterator<Source> iter = source_list.listIterator();
+			ListIterator<Source> iter = source_list.listIterator();
 			while (iter.hasNext()) {
 				Source sn = iter.next();
 				if (sn.sourceID == s.sourceID && sn.bufferID == s.bufferID &&
@@ -210,8 +207,9 @@ public class SoundPhysics {
 					ListIterator<Source> iter = source_list.listIterator();
 					while (iter.hasNext())  {
 						Source s = iter.next();
-						event.getLeft().add(String.valueOf(s.sourceID)+"-"+String.valueOf(s.posX)+","+String.valueOf(s.posY)+","+String.valueOf(s.posZ));
-						int buffq = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_QUEUED);
+						Vec3d tmp = new Vec3d(s.posX,s.posY,s.posZ);
+						event.getLeft().add(String.valueOf(s.sourceID)+"-"+s.category.toString()+"-"+s.name+"-"+tmp.toString());
+						/*int buffq = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_QUEUED);
 						int buffp = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_PROCESSED);
 						int sampoff = AL10.alGetSourcei(s.sourceID, AL11.AL_SAMPLE_OFFSET);
 						int byteoff = AL10.alGetSourcei(s.sourceID, AL11.AL_BYTE_OFFSET);
@@ -223,16 +221,21 @@ public class SoundPhysics {
 							k = "0/? ";
 						}
 						event.getLeft().add(k+String.valueOf(buffp)+"/"+String.valueOf(buffq)+" "+String.valueOf(s.bufferID));
-						event.getLeft().add("----");
+						event.getLeft().add("----");*/
 					}
 				}
 			}
 		}
 	}
 
-	private static void setupThread() {
-		thread_alive = false;
-		source_list = Collections.synchronizedList(new ArrayList<Source>());
+	private static synchronized void setupThread() {
+		if (proc_thread != null) {
+			thread_signal_death = false;
+			thread_alive = false;
+			while (!thread_signal_death);
+		}
+		if (source_list == null) source_list = Collections.synchronizedList(new ArrayList<Source>());
+		else source_list.clear();
 		proc_thread = new ProcThread();
 		thread_alive = true;
 		proc_thread.start();
@@ -350,7 +353,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
-		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID));
+		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
 		if ((mc.player == null | mc.world == null | posY <= 0 | soundCat == SoundCategory.RECORDS 
