@@ -558,6 +558,7 @@ public class SoundPhysics {
 		}
 
 		float airAbsorptionFactor = 1.0f;
+
 		if (snowFactor > 0.0f) {
 			airAbsorptionFactor = Math.max(Config.snowAirAbsorptionFactor*mc.world.getRainStrength(1.0f)*snowFactor,airAbsorptionFactor);
 		}
@@ -825,7 +826,7 @@ public class SoundPhysics {
 		EFX10.alFilterf(directFilter0, EFX10.AL_LOWPASS_GAINHF, directCutoff);
 		AL10.alSourcei(sourceID, EFX10.AL_DIRECT_FILTER, directFilter0);
 
-		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, Config.airAbsorption*airAbsorptionFactor);
+		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, Config.airAbsorption * airAbsorptionFactor);
 	}
 
 	/**
