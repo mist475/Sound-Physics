@@ -407,6 +407,31 @@ public class SoundPhysics {
 		return entity.getEyeHeight();
 	}
 
+	// Copy of isRainingAt
+	private static boolean isSnowingAt(BlockPos position)
+	{
+		if (!mc.world.isRaining())
+		{
+			return false;
+		}
+		else if (!mc.world.canSeeSky(position))
+		{
+			return false;
+		}
+		else if (mc.world.getPrecipitationHeight(position).getY() > position.getY())
+		{
+			return false;
+		}
+		else
+		{
+			/*boolean cansnow = mc.world.canSnowAt(position, false);
+			if (mc.world.getBiome(position).getEnableSnow() && cansnow) return true;
+			else if (cansnow) return true;
+			else return false;*/
+			return mc.world.canSnowAt(position, false) | mc.world.getBiome(position).getEnableSnow();
+		}
+	}
+
 	@SuppressWarnings("deprecation")
 	private static float getBlockReflectivity(final BlockPos blockPos) {
 		final Block block = mc.world.getBlockState(blockPos).getBlock();
@@ -501,14 +526,14 @@ public class SoundPhysics {
 				| category == SoundCategory.MUSIC) {
 			// posY <= 0 as a condition has to be there: Ingame
 			// menu clicks do have a player and world present
-			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
 
 		final boolean isRain = rainPattern.matcher(name).matches();
 
 		if (Config.skipRainOcclusionTracing && isRain) {
-			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 			return;
 		}
 
@@ -518,6 +543,24 @@ public class SoundPhysics {
 		final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
 		final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, name, category);
 		final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
+
+		float snowFactor = 0.0f;
+
+		if (mc.world.isRaining()) {
+			final Vec3d middlePos = playerPos.add(soundPos).scale(0.5);
+			final BlockPos playerPosBlock = new BlockPos(playerPos);
+			final BlockPos soundPosBlock = new BlockPos(soundPos);
+			final BlockPos middlePosBlock = new BlockPos(middlePos);
+			final int snowingPlayer = isSnowingAt(playerPosBlock) ? 1 : 0;
+			final int snowingSound = isSnowingAt(soundPosBlock) ? 1 : 0;
+			final int snowingMiddle = isSnowingAt(middlePosBlock) ? 1 : 0;
+			snowFactor = snowingPlayer * 0.25f + snowingMiddle * 0.5f + snowingSound * 0.25f;
+		}
+
+		float airAbsorptionFactor = 1.0f;
+		if (snowFactor > 0.0f) {
+			airAbsorptionFactor = Math.max(Config.snowAirAbsorptionFactor*mc.world.getRainStrength(1.0f)*snowFactor,airAbsorptionFactor);
+		}
 
 		/*final double distance = playerPos.distanceTo(soundPos);
 		final double time = (distance/343.3)*1000;
@@ -581,7 +624,7 @@ public class SoundPhysics {
 
 		if (isRain) {
 			setEnvironment(sourceID, sendGain0, sendGain1, sendGain2, sendGain3, sendCutoff0, sendCutoff1, sendCutoff2,
-					sendCutoff3, directCutoff, directGain);
+					sendCutoff3, directCutoff, directGain, airAbsorptionFactor);
 			return;
 		}
 
@@ -753,12 +796,13 @@ public class SoundPhysics {
 		}
 
 		setEnvironment(sourceID, sendGain0, sendGain1, sendGain2, sendGain3, sendCutoff0, sendCutoff1, sendCutoff2,
-				sendCutoff3, directCutoff, directGain);
+				sendCutoff3, directCutoff, directGain, airAbsorptionFactor);
 	}
 
 	private static void setEnvironment(final int sourceID, final float sendGain0, final float sendGain1,
 			final float sendGain2, final float sendGain3, final float sendCutoff0, final float sendCutoff1,
-			final float sendCutoff2, final float sendCutoff3, final float directCutoff, final float directGain) {
+			final float sendCutoff2, final float sendCutoff3, final float directCutoff, final float directGain,
+			final float airAbsorptionFactor) {
 		// Set reverb send filter values and set source to send to all reverb fx
 		// slots
 		EFX10.alFilterf(sendFilter0, EFX10.AL_LOWPASS_GAIN, sendGain0);
@@ -781,7 +825,7 @@ public class SoundPhysics {
 		EFX10.alFilterf(directFilter0, EFX10.AL_LOWPASS_GAINHF, directCutoff);
 		AL10.alSourcei(sourceID, EFX10.AL_DIRECT_FILTER, directFilter0);
 
-		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, Config.airAbsorption);
+		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, Config.airAbsorption*airAbsorptionFactor);
 	}
 
 	/**
