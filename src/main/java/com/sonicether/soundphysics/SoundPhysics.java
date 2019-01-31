@@ -57,6 +57,7 @@ public class SoundPhysics {
 	private static final Pattern blockPattern = Pattern.compile(".*block.*");
 	private static final Pattern uiPattern = Pattern.compile(".*\\/ui\\/.*");
 	private static final Pattern clickPattern = Pattern.compile(".*random.click.*");
+	private static final Pattern noteBlockPattern = Pattern.compile(".*note.harp.*");
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
@@ -354,6 +355,7 @@ public class SoundPhysics {
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
+		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
 		if ((mc.player == null | mc.world == null | posY <= 0 | soundCat == SoundCategory.RECORDS 
@@ -407,11 +409,16 @@ public class SoundPhysics {
 		return entity.getEyeHeight();
 	}
 
-	// Copy of isRainingAt
+	// Unused
 	private static boolean isSnowingAt(BlockPos position)
 	{
-		if (!mc.world.isRaining())
-		{
+		return isSnowingAt(position, true);
+	}
+
+	// Copy of isRainingAt
+	private static boolean isSnowingAt(BlockPos position, boolean check_rain)
+	{
+		if (check_rain && !mc.world.isRaining()) {
 			return false;
 		}
 		else if (!mc.world.canSeeSky(position))
@@ -551,9 +558,9 @@ public class SoundPhysics {
 			final BlockPos playerPosBlock = new BlockPos(playerPos);
 			final BlockPos soundPosBlock = new BlockPos(soundPos);
 			final BlockPos middlePosBlock = new BlockPos(middlePos);
-			final int snowingPlayer = isSnowingAt(playerPosBlock) ? 1 : 0;
-			final int snowingSound = isSnowingAt(soundPosBlock) ? 1 : 0;
-			final int snowingMiddle = isSnowingAt(middlePosBlock) ? 1 : 0;
+			final int snowingPlayer = isSnowingAt(playerPosBlock,false) ? 1 : 0;
+			final int snowingSound = isSnowingAt(soundPosBlock,false) ? 1 : 0;
+			final int snowingMiddle = isSnowingAt(middlePosBlock,false) ? 1 : 0;
 			snowFactor = snowingPlayer * 0.25f + snowingMiddle * 0.5f + snowingSound * 0.25f;
 		}
 
@@ -826,7 +833,7 @@ public class SoundPhysics {
 		EFX10.alFilterf(directFilter0, EFX10.AL_LOWPASS_GAINHF, directCutoff);
 		AL10.alSourcei(sourceID, EFX10.AL_DIRECT_FILTER, directFilter0);
 
-		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, Config.airAbsorption * airAbsorptionFactor);
+		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, MathHelper.clamp(Config.airAbsorption * airAbsorptionFactor,0.0f,10.0f));
 	}
 
 	/**
