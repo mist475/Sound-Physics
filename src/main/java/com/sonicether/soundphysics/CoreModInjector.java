@@ -211,7 +211,26 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: setHearing
 			bytes = patchMethodInClass(obfuscated, bytes, "setHearing", "(FF)V", Opcodes.FLOAD,
 					AbstractInsnNode.VAR_INSN, "", null, 1, toInject, false, 0, 0, false, 0);
+		} else
+
+		if (obfuscated.equals("pl.asie.computronics.api.audio.AudioPacket") && Config.computronicsPatching) {
+			// Inside AudioPacket
+			InsnList toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"soundDistanceAllowance", "D"));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"soundDistanceAllowance", "D"));
+			toInject.add(new InsnNode(Opcodes.DMUL));
+			toInject.add(new InsnNode(Opcodes.D2I));
+			toInject.add(new InsnNode(Opcodes.IMUL));
+
+			// Target method: canHearReceiver
+			bytes = patchMethodInClass(obfuscated, bytes, "canHearReceiver", "(Lnet/minecraft/entity/player/EntityPlayerMP;Lpl/asie/computronics/api/audio/IAudioReceiver;)Z", Opcodes.IMUL,
+					AbstractInsnNode.INSN, "", null, -1, toInject, false, 0, 0, false, 0);
 		}
+
+		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
 
 		return bytes;
 	}

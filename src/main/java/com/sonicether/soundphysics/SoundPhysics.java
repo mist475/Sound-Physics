@@ -45,7 +45,8 @@ import java.util.TimerTask;
 
 import org.objectweb.asm.Type;
 
-@Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
+@Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
+	dependencies="before:computronics") // Dependencies to make sure that SP's config is loaded before patching Computronics
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
