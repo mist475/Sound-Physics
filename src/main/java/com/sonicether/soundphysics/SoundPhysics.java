@@ -230,16 +230,19 @@ public class SoundPhysics {
 	}
 
 	private static synchronized void setupThread() {
-		if (proc_thread != null) {
+		if (source_list == null) source_list = Collections.synchronizedList(new ArrayList<Source>());
+		else source_list.clear();
+
+		/*if (proc_thread != null) {
 			thread_signal_death = false;
 			thread_alive = false;
 			while (!thread_signal_death);
+		}*/
+		if (proc_thread == null) {
+			proc_thread = new ProcThread();
+			thread_alive = true;
+			proc_thread.start();
 		}
-		if (source_list == null) source_list = Collections.synchronizedList(new ArrayList<Source>());
-		else source_list.clear();
-		proc_thread = new ProcThread();
-		thread_alive = true;
-		proc_thread.start();
 	}
 
 	public static void applyConfigChanges() {
