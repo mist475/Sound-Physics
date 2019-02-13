@@ -50,7 +50,7 @@ import org.objectweb.asm.Type;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.5-2";
+	public static final String version = "1.0.6";
 	public static final String mcVersion = "1.12.2";
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
