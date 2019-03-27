@@ -357,7 +357,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
-		log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
+		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
 		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
@@ -567,10 +567,7 @@ public class SoundPhysics {
 		final float absorptionCoeff = Config.globalBlockAbsorption * 3.0f;
 
 		final Vec3 playerPos = Vec3.createVectorHelper(mc.thePlayer.posX, mc.thePlayer.posY + mc.thePlayer.getEyeHeight(), mc.thePlayer.posZ);
-		final Vec3 osoundPos = Vec3.createVectorHelper(posX, posY, posZ);
-		log("Old sound pos - "+osoundPos.toString());
 		final Vec3 soundPos = offsetSoundByName(posX, posY, posZ, playerPos, name, category);
-		log("New sound pos - "+soundPos.toString());
 		final Vec3 normalToPlayer = playerPos.subtract(soundPos).normalize();
 
 		float snowFactor = 0.0f;
