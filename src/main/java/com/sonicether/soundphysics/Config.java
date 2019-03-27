@@ -25,7 +25,9 @@ public class Config {
 	public static float globalBlockAbsorption;
 	public static float globalBlockReflectance;
 	public static float airAbsorption;
+	public static float snowAirAbsorptionFactor;
 	public static float underwaterFilter;
+	public static boolean noteBlockEnable;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
@@ -46,15 +48,20 @@ public class Config {
 	public static float sandReflectivity;
 	public static float snowReflectivity;
 
-	//Compatibility
+	// compatibility
 	public static boolean computronicsPatching;
 	public static boolean autoSteroDownmix;
-	public static boolean autoSteroDownmixDebug;
+	
+	// misc
+	public static boolean autoSteroDownmixLogging;
+	public static boolean debugInfoShow;
+	public static boolean injectorLogging;
 
 	private static final String categoryGeneral = "General";
 	private static final String categoryPerformance = "Performance";
 	private static final String categoryMaterialProperties = "Material properties";
 	private static final String categoryCompatibility = "Compatibility";
+	private static final String categoryMisc = "Misc";
 
 	static {
 		instance = new Config();
@@ -86,6 +93,7 @@ public class Config {
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryPerformance)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMaterialProperties)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryCompatibility)));
+		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryMisc)));
 
 		return list;
 	}
@@ -109,8 +117,12 @@ public class Config {
 				"Minecraft won't allow sounds to play past a certain distance. This parameter is a multiplier for how far away a sound source is allowed to be in order for it to actually play. Values too high can cause polyphony issues.");
 		airAbsorption = this.forgeConfig.getFloat("Air Absorption", categoryGeneral, 1.0f, 0.0f, 5.0f,
 				"A value controlling the amount that air absorbs high frequencies with distance. A value of 1.0 is physically correct for air with normal humidity and temperature. Higher values mean air will absorb more high frequencies with distance. 0 disables this effect.");
+		snowAirAbsorptionFactor = this.forgeConfig.getFloat("Max Snow Air Absorption Factor", categoryGeneral, 5.0f, 0.0f, 10.0f,
+				"The maximum air absorption factor when it's snowing. The real absorption factor will depend on the snow's intensity. Set to 1 or lower to disable");
 		underwaterFilter = this.forgeConfig.getFloat("Underwater Filter", categoryGeneral, 0.8f, 0.0f, 1.0f,
 				"How much sound is filtered when the player is underwater. 0.0 means no filter. 1.0 means fully filtered.");
+		noteBlockEnable = this.forgeConfig.getBoolean("Affect Note Blocks", categoryGeneral, true,
+				"If true, note blocks will be processed.");
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,
@@ -154,8 +166,14 @@ public class Config {
 				"MAY REQUIRE RESTART.If true, patches the computronics sound sources so it works with sound physics.");
 		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
 				"MAY REQUIRE RESTART.If true, Automatically downmix stereo sounds that are loaded to mono");
-		autoSteroDownmixDebug = this.forgeConfig.getBoolean("Stereo downmix debug", categoryCompatibility, false,
+
+		// misc
+		autoSteroDownmixLogging = this.forgeConfig.getBoolean("Stereo downmix Logging", categoryMisc, false,
 				"If true, Prints sound name and format of the sounds that get converted");
+		debugInfoShow = this.forgeConfig.getBoolean("Dynamic env. info in F3", categoryMisc, false,
+				"If true, Shows sources currently playing in the F3 debug info");
+		injectorLogging = this.forgeConfig.getBoolean("Injector Logging", categoryMisc, false,
+				"If true, Logs debug info about the injector");
 
 		if (this.forgeConfig.hasChanged()) {
 			this.forgeConfig.save();
