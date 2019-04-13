@@ -175,9 +175,9 @@ public class Config {
 		injectorLogging = this.forgeConfig.getBoolean("Injector Logging", categoryMisc, false,
 				"If true, Logs debug info about the injector");
 
+		SoundPhysics.applyConfigChanges();
 		if (this.forgeConfig.hasChanged()) {
 			this.forgeConfig.save();
-			SoundPhysics.applyConfigChanges();
 		}
 	}
 

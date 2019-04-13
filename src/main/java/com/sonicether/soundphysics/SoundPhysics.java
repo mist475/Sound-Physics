@@ -25,12 +25,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.SoundHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -45,15 +44,18 @@ import java.nio.ByteOrder;
 import java.util.Timer;  
 import java.util.TimerTask;
 
-import org.objectweb.asm.Type;
+import org.apache.commons.lang3.reflect.FieldUtils;
 
 @Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
-	dependencies="before:computronics") // Dependencies to make sure that SP's config is loaded before patching Computronics
+	dependencies = SoundPhysics.deps)
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.6";
 	public static final String mcVersion = "1.12.2";
+	public static final String deps = "before:computronics";  // Dependencies to make sure that SP's config is loaded before patching Computronics
+
+	public static boolean onServer = false;
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
 	private static final Pattern stepPattern = Pattern.compile(".*step.*");
@@ -408,7 +410,19 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
-		if (stepPattern.matcher(sound.getSoundName().getPath()).matches()) {
+		String soundPath = "";
+		// getSoundName() isn't on the server side, and soundName is private
+		if (!onServer) {
+			soundPath = sound.getSoundName().getPath();
+		} else {
+			try {	// field_187506_b = soundName
+				ResourceLocation rl = (ResourceLocation)FieldUtils.readField(sound, "field_187506_b", true);
+				soundPath = rl.getPath();
+			} catch (Exception e) {
+				logError(e.toString());
+			}
+		}
+		if (stepPattern.matcher(soundPath).matches()) {
 			return 0;
 		}
 
