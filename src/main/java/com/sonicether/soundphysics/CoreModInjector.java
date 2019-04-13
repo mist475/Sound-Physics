@@ -180,7 +180,7 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.METHOD_INSN, "bK", null, -1, toInject, true, 0, 0, false, -3);
 		} else
 
-		// Fix for computronics's sound card and tape drive
+		// Fix for computronics's devices
 		if (obfuscated.equals("pl.asie.lib.audio.StreamingAudioPlayer") && Config.computronicsPatching) {
 			// Inside StreamingAudioPlayer
 			InsnList toInject = new InsnList();
@@ -228,6 +228,67 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: canHearReceiver
 			bytes = patchMethodInClass(obfuscated, bytes, "canHearReceiver", "(Lnet/minecraft/entity/player/EntityPlayerMP;Lpl/asie/computronics/api/audio/IAudioReceiver;)Z", Opcodes.IMUL,
 					AbstractInsnNode.INSN, "", null, -1, toInject, false, 0, 0, false, 0);
+		} else
+
+		if (obfuscated.equals("pl.asie.computronics.tile.TileTapeDrive$1") && Config.computronicsPatching) {
+			// Inside TileTapeDrive.internalSpeaker
+			InsnList toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/computronics/tile/TileTapeDrive$1", "this$0",
+					"Lpl/asie/computronics/tile/TileTapeDrive;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "pl/asie/computronics/Computronics",
+					"tapeReader", "Lpl/asie/computronics/block/BlockTapeReader;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/computronics/block/BlockTapeReader", "rotation",
+					"Lpl/asie/lib/block/BlockBase$Rotation;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/lib/block/BlockBase$Rotation", "FACING",
+					"Lnet/minecraft/block/properties/PropertyDirection;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "computronicsOffset",
+					"(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/block/properties/PropertyDirection;)Lnet/minecraft/util/math/Vec3d;", false));
+
+			// Target method: getSoundPos
+			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+		} else
+
+		if (obfuscated.equals("pl.asie.computronics.tile.TileSpeaker") && Config.computronicsPatching) {
+			// Inside TileSpeaker
+			InsnList toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "pl/asie/computronics/Computronics",
+					"speaker", "Lpl/asie/computronics/block/BlockSpeaker;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/computronics/block/BlockSpeaker", "rotation",
+					"Lpl/asie/lib/block/BlockBase$Rotation;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/lib/block/BlockBase$Rotation", "FACING",
+					"Lnet/minecraft/block/properties/PropertyDirection;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "computronicsOffset",
+					"(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/block/properties/PropertyDirection;)Lnet/minecraft/util/math/Vec3d;", false));
+
+			// Target method: getSoundPos
+			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+		} else
+
+		if (obfuscated.equals("pl.asie.computronics.tile.TileSpeechBox$1") && Config.computronicsPatching) {
+			// Inside TileSpeechBox.internalSpeaker
+			InsnList toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/computronics/tile/TileSpeechBox$1", "this$0",
+					"Lpl/asie/computronics/tile/TileSpeechBox;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "pl/asie/computronics/Computronics",
+					"speechBox", "Lpl/asie/computronics/block/BlockSpeechBox;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/computronics/block/BlockSpeechBox", "rotation",
+					"Lpl/asie/lib/block/BlockBase$Rotation;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "pl/asie/lib/block/BlockBase$Rotation", "FACING",
+					"Lnet/minecraft/block/properties/PropertyDirection;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "computronicsOffset",
+					"(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/tileentity/TileEntity;Lnet/minecraft/block/properties/PropertyDirection;)Lnet/minecraft/util/math/Vec3d;", false));
+
+			// Target method: getSoundPos
+			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");

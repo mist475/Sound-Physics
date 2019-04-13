@@ -18,6 +18,8 @@ import org.lwjgl.BufferUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
@@ -411,6 +413,14 @@ public class SoundPhysics {
 		}
 
 		return entity.getEyeHeight();
+	}
+
+	public static Vec3d computronicsOffset(Vec3d or, TileEntity te, PropertyDirection pd)
+	{
+		if (!te.hasWorld()) return or;
+		EnumFacing ef = te.getWorld().getBlockState(te.getPos()).getValue(pd);
+		Vec3d efv = getNormalFromFacing(ef).scale(0.51);
+		return or.add(efv);
 	}
 
 	// Unused
