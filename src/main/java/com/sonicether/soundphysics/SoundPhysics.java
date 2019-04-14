@@ -186,18 +186,22 @@ public class SoundPhysics {
 		}
 	}
 
-	public static boolean source_check(Source s) {
+	public static void source_check_add(Source s) {
 		synchronized (source_list) {
 			ListIterator<Source> iter = source_list.listIterator();
 			while (iter.hasNext()) {
 				Source sn = iter.next();
-				if (sn.sourceID == s.sourceID && sn.bufferID == s.bufferID &&
-					sn.posX == s.posX && sn.posY == s.posY && sn.posZ == s.posZ) {
-					return true;
+				if (sn.sourceID == s.sourceID) {
+					sn.posX = s.posX;
+					sn.posY = s.posY;
+					sn.posZ = s.posZ;
+					sn.category = s.category;
+					sn.name = s.name;
+					return;
 				}
 			}
+			source_list.add(s);
 		}
-		return false;
 	}
 
 	@Mod.EventBusSubscriber
@@ -369,8 +373,7 @@ public class SoundPhysics {
 		if ((mc.player == null | mc.world == null | posY <= 0 | soundCat == SoundCategory.RECORDS 
 		| soundCat == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(soundName).matches())) return;
 		Source tmp = new Source(sourceID,posX,posY,posZ,soundCat,soundName);
-		if (source_check(tmp)) return;
-		source_list.add(tmp);
+		source_check_add(tmp);
 	}
 
 	/**
