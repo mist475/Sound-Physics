@@ -111,9 +111,15 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void init() {
-		setupEFX();
 		mc = Minecraft.getMinecraft();
-		setupThread();
+		// I could check if the sound system loaded correctly but that's long and anoying
+		try {
+			setupEFX();
+			setupThread();
+		} catch (Throwable e) {
+			logError("Failed to init EFX or thread");
+			logError(e.toString());
+		}
 	}
 
 	public static class Source {
@@ -209,7 +215,8 @@ public class SoundPhysics {
 		@SubscribeEvent
 		public static void onDebugOverlay(RenderGameOverlayEvent.Text event)
 		{
-			if(mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion && Config.debugInfoShow) {
+			if (mc == null) return; // In case we fuck up somewhere
+			if (mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion && Config.debugInfoShow) {
 				event.getLeft().add("");
 				event.getLeft().add("[SoundPhysics] "+String.valueOf(source_list.size())+" Sources");
 				event.getLeft().add("[SoundPhysics] Source list :");
@@ -370,8 +377,9 @@ public class SoundPhysics {
 		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
-		if ((mc.player == null | mc.world == null | posY <= 0 | soundCat == SoundCategory.RECORDS 
-		| soundCat == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(soundName).matches())) return;
+		if ((mc.player == null || mc.world == null || posY <= 0 || soundCat == SoundCategory.RECORDS 
+		|| soundCat == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(soundName).matches())) return;
+		if (clickPattern.matcher(soundName).matches() || uiPattern.matcher(soundName).matches()) return;
 		Source tmp = new Source(sourceID,posX,posY,posZ,soundCat,soundName);
 		source_check_add(tmp);
 	}
