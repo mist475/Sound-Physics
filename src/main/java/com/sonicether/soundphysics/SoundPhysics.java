@@ -213,10 +213,8 @@ public class SoundPhysics {
 	@Mod.EventBusSubscriber
 	public static class DebugDisplayEventHandler {
 		@SubscribeEvent
-		public static void onDebugOverlay(RenderGameOverlayEvent.Text event)
-		{
-			if (mc == null) return; // In case we fuck up somewhere
-			if (mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion && Config.debugInfoShow) {
+		public static void onDebugOverlay(RenderGameOverlayEvent.Text event) {
+			if (mc != null && mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion && Config.debugInfoShow) {
 				event.getLeft().add("");
 				event.getLeft().add("[SoundPhysics] "+String.valueOf(source_list.size())+" Sources");
 				event.getLeft().add("[SoundPhysics] Source list :");
@@ -366,7 +364,7 @@ public class SoundPhysics {
 	 */
 	// For sounds that get played using OpenAL directly or just not using the minecraft sound system
 	public static void onPlaySoundAL(final float posX, final float posY, final float posZ, final int sourceID) {
-		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.BLOCKS, "null");
+		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.MASTER, "null");
 	}
 
 	/**
