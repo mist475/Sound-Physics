@@ -523,7 +523,8 @@ public class SoundPhysics {
 			offsetY = 0.13;
 		}
 
-		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches()) {
+		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches() || 
+			!mc.theWorld.isAirBlock((int)Math.floor(soundX),(int)Math.floor(soundY),(int)Math.floor(soundZ))) {
 			// The ray will probably hit the block that it's emitting from
 			// before
 			// escaping. Offset the ray start position towards the player by the
@@ -610,7 +611,7 @@ public class SoundPhysics {
 		float occlusionAccumulation = 0.0f;
 
 		for (int i = 0; i < 10; i++) {
-			final MovingObjectPosition rayHit = mc.theWorld.func_147447_a(rayOrigin, playerPos, true, true, false);
+			final MovingObjectPosition rayHit = mc.theWorld.rayTraceBlocks(rayOrigin, playerPos, true);
 
 			if (rayHit == null) {
 				break;
@@ -684,7 +685,7 @@ public class SoundPhysics {
 			final Vec3 rayEnd = Vec3.createVectorHelper(rayStart.xCoord + rayDir.xCoord * maxDistance, rayStart.yCoord + rayDir.yCoord * maxDistance,
 					rayStart.zCoord + rayDir.zCoord * maxDistance);
 
-			final MovingObjectPosition rayHit = mc.theWorld.func_147447_a(rayStart, rayEnd, true, true, false);
+			final MovingObjectPosition rayHit = mc.theWorld.rayTraceBlocks(rayStart, rayEnd, true);
 
 			if (rayHit != null) {
 				final double rayLength = soundPos.distanceTo(rayHit.hitVec);
@@ -706,7 +707,7 @@ public class SoundPhysics {
 					final Vec3 newRayEnd = Vec3.createVectorHelper(newRayStart.xCoord + newRayDir.xCoord * maxDistance,
 							newRayStart.yCoord + newRayDir.yCoord * maxDistance, newRayStart.zCoord + newRayDir.zCoord * maxDistance);
 
-					final MovingObjectPosition newRayHit = mc.theWorld.func_147447_a(newRayStart, newRayEnd, true, true, false);
+					final MovingObjectPosition newRayHit = mc.theWorld.rayTraceBlocks(newRayStart, newRayEnd, true);
 
 					float energyTowardsPlayer = 0.25f;
 					final float blockReflectivity = getBlockReflectivity(lastHitBlock);
@@ -734,7 +735,7 @@ public class SoundPhysics {
 							final Vec3 finalRayStart = Vec3.createVectorHelper(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01,
 									lastHitPos.yCoord + lastHitNormal.yCoord * 0.01, lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
 
-							final MovingObjectPosition finalRayHit = mc.theWorld.func_147447_a(finalRayStart, playerPos, true, true, false);
+							final MovingObjectPosition finalRayHit = mc.theWorld.rayTraceBlocks(finalRayStart, playerPos, true);
 
 							if (finalRayHit == null) {
 								// log("Secondary ray hit the player!");
