@@ -676,7 +676,7 @@ public class SoundPhysics {
 		// Shoot rays around sound
 		final float phi = 1.618033988f;
 		final float gAngle = phi * (float) Math.PI * 2.0f;
-		final float maxDistance = 256.0f;
+		final float maxDistance = Config.maxDistance;
 
 		final int numRays = Config.environmentEvaluationRays;
 		final int rayBounces = Config.environmentEvaluationRaysBounces;

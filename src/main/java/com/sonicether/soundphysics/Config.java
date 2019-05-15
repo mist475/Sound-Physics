@@ -28,6 +28,7 @@ public class Config {
 	public static float snowAirAbsorptionFactor;
 	public static float underwaterFilter;
 	public static boolean noteBlockEnable;
+	public static float maxDistance;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
@@ -123,6 +124,8 @@ public class Config {
 				"How much sound is filtered when the player is underwater. 0.0 means no filter. 1.0 means fully filtered.");
 		noteBlockEnable = this.forgeConfig.getBoolean("Affect Note Blocks", categoryGeneral, true,
 				"If true, note blocks will be processed.");
+		maxDistance = this.forgeConfig.getFloat("Max ray distance", categoryGeneral, 256.0f, 1.0f, 8192.0f,
+				"How far the rays should be traced.");
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,
