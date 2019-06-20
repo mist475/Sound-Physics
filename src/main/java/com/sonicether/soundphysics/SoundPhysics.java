@@ -51,7 +51,7 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.6";
+	public static final String version = "1.0.7";
 	public static final String mcVersion = "1.12.2";
 	public static final String deps = "before:computronics";  // Dependencies to make sure that SP's config is loaded before patching Computronics
 
