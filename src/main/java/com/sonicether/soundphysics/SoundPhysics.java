@@ -364,7 +364,7 @@ public class SoundPhysics {
 	 */
 	// For sounds that get played using OpenAL directly or just not using the minecraft sound system
 	public static void onPlaySoundAL(final float posX, final float posY, final float posZ, final int sourceID) {
-		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.MASTER, "null");
+		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.MASTER, "openal");
 	}
 
 	/**
@@ -541,7 +541,8 @@ public class SoundPhysics {
 			offsetY = 0.1;
 		}
 
-		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches()) {
+		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches() || 
+			(name == "openal" && !mc.world.isAirBlock(new BlockPos(soundX,soundY,soundZ)))) {
 			// The ray will probably hit the block that it's emitting from
 			// before
 			// escaping. Offset the ray start position towards the player by the
