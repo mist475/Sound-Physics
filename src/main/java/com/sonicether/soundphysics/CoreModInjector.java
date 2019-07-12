@@ -15,11 +15,14 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import net.minecraft.launchwrapper.IClassTransformer;
 
 public class CoreModInjector implements IClassTransformer {
 
-	private static final String logPrefix = "[SOUND PHYSICS INJECTOR]";
+	public static final Logger logger = LogManager.getLogger(SoundPhysics.modid+"injector");
 
 	@Override
 	public byte[] transform(final String obfuscated, final String deobfuscated, byte[] bytes) {
@@ -450,10 +453,10 @@ public class CoreModInjector implements IClassTransformer {
 	}
 
 	public static void log(final String message) {
-		if (Config.injectorLogging) System.out.println(logPrefix.concat(" : ").concat(message));
+		if (Config.injectorLogging) logger.info(message);
 	}
 
 	public static void logError(final String errorMessage) {
-		System.out.println(logPrefix.concat(" [ERROR] : ").concat(errorMessage));
+		logger.error(errorMessage);
 	}
 }

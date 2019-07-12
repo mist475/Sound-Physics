@@ -45,6 +45,9 @@ import java.nio.ByteOrder;
 import java.util.Timer;  
 import java.util.TimerTask;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 @Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
@@ -55,6 +58,8 @@ public class SoundPhysics {
 	public static final String version = "1.0.7";
 	public static final String mcVersion = "1.12.2";
 	public static final String deps = "before:computronics;before:immersiverailroading";  // Dependencies to make sure that SP's config is loaded before patching mods
+
+	public static final Logger logger = LogManager.getLogger(modid);
 
 	public static boolean onServer = false;
 
@@ -75,7 +80,6 @@ public class SoundPhysics {
 		Config.instance.init(event);
 	}
 
-	private static final String logPrefix = "[SOUND PHYSICS]";
 	private static int auxFXSlot0;
 	private static int auxFXSlot1;
 	private static int auxFXSlot2;
@@ -931,11 +935,11 @@ public class SoundPhysics {
 	}
 
 	public static void log(final String message) {
-		System.out.println(logPrefix.concat(" : ").concat(message));
+		logger.info(message);
 	}
 
 	public static void logError(final String errorMessage) {
-		System.out.println(logPrefix.concat(" [ERROR] : ").concat(errorMessage));
+		logger.error(errorMessage);
 	}
 
 	protected static boolean checkErrorLog(final String errorMessage) {
