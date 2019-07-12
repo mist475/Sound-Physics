@@ -382,7 +382,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
-		log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
+		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
 		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;
