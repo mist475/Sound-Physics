@@ -14,6 +14,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -301,9 +302,6 @@ public class CoreModInjector implements IClassTransformer {
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "qg","i", "Lqg;")); // Ambient sound category
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 					"setLastSoundCategory", "(Lqg;)V", false));
-			/*toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "resource",
-					"Ljava/net/URL;"));*/
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "oggLocation",
 					"Lnf;"));
@@ -334,6 +332,20 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: update
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESTATIC,
 					AbstractInsnNode.METHOD_INSN, "getDampeningAmount", null, -1, toInject, true, 0, 0, false, 0);
+
+			/*toInject = new InsnList();
+
+			toInject.add(new LdcInsnNode(1.75d));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "gauge",
+					"Lcam72cam/immersiverailroading/library/Gauge;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "cam72cam/immersiverailroading/library/Gauge", "scale", "()D", false));
+			toInject.add(new InsnNode(Opcodes.DMUL));
+			toInject.add(new InsnNode(Opcodes.DADD));
+
+			// Target method: update
+			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESPECIAL,
+					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5);*/
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
