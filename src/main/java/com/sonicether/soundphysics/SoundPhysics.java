@@ -1,5 +1,6 @@
 package com.sonicether.soundphysics;
 
+import java.net.URL;
 import java.util.regex.Pattern;
 import java.util.List;
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class SoundPhysics {
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.7";
 	public static final String mcVersion = "1.12.2";
-	public static final String deps = "before:computronics";  // Dependencies to make sure that SP's config is loaded before patching Computronics
+	public static final String deps = "before:computronics;before:immersiverailroading";  // Dependencies to make sure that SP's config is loaded before patching mods
 
 	public static boolean onServer = false;
 
@@ -354,6 +355,13 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
+	public static void setLastSoundName(final String soundName) {
+		lastSoundName = soundName;
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
 	// For sounds that get played normally
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
 		onPlaySound(posX, posY, posZ, sourceID, lastSoundCategory, lastSoundName);
@@ -371,7 +379,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
-		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
+		log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
 		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
 		if (!Config.dynamicEnvironementEvalutaion) return;

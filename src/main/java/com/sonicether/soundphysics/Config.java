@@ -51,6 +51,7 @@ public class Config {
 
 	// compatibility
 	public static boolean computronicsPatching;
+	public static boolean irPatching;
 	public static boolean autoSteroDownmix;
 	
 	// misc
@@ -167,6 +168,8 @@ public class Config {
 		// compatibility
 		computronicsPatching = this.forgeConfig.getBoolean("Patch Computronics", categoryCompatibility, true,
 				"MAY REQUIRE RESTART.If true, patches the computronics sound sources so it works with sound physics.");
+		irPatching = this.forgeConfig.getBoolean("Patch Immersive Railroading", categoryCompatibility, true,
+				"MAY REQUIRE RESTART.If true, patches the immersive railroading sound sources so it works with sound physics.");
 		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
 				"MAY REQUIRE RESTART.If true, Automatically downmix stereo sounds that are loaded to mono");
 

@@ -289,6 +289,48 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: getSoundPos
 			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
 					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+		} else
+
+		if (obfuscated.equals("cam72cam.immersiverailroading.sound.ClientSound") && Config.irPatching) {
+			// Inside ClientSound
+			InsnList toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "qg","i", "Lqg;")); // Ambient sound category
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"setLastSoundCategory", "(Lqg;)V", false));
+			/*toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "resource",
+					"Ljava/net/URL;"));*/
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "oggLocation",
+					"Lnf;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"setLastSoundName", "(Ljava/lang/String;)V", false));
+
+			// Target method: play
+			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lnet/minecraft/util/math/Vec3d;)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "update", null, -1, toInject, false, 0, 0, false, 0);
+
+			toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"soundDistanceAllowance", "D"));
+			toInject.add(new InsnNode(Opcodes.DMUL));
+
+			// Target method: play
+			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lnet/minecraft/util/math/Vec3d;)V", Opcodes.DCMPG,
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+
+			toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"globalVolumeMultiplier", "F"));
+			toInject.add(new InsnNode(Opcodes.FMUL));
+
+			// Target method: update
+			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESTATIC,
+					AbstractInsnNode.METHOD_INSN, "getDampeningAmount", null, -1, toInject, true, 0, 0, false, 0);
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
