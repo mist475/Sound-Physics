@@ -33,7 +33,6 @@ public class Config {
 	// performance
 	public static boolean skipRainOcclusionTracing;
 	public static int environmentEvaluationRays;
-	public static int environmentEvaluationRaysBounces;
 	public static boolean simplerSharedAirspaceSimulation;
 	public static boolean dynamicEnvironementEvalutaion;
 	public static int dynamicEnvironementEvalutaionFrequency;
@@ -134,9 +133,6 @@ public class Config {
 		environmentEvaluationRays = this.forgeConfig.getInt("Environment Evaluation Rays", categoryPerformance, 32, 8,
 				64,
 				"The number of rays to trace to determine reverberation for each sound source. More rays provides more consistent tracing results but takes more time to calculate. Decrease this value if you experience lag spikes when sounds play.");
-		environmentEvaluationRaysBounces = this.forgeConfig.getInt("Environment Evaluation Rays Bounces", categoryPerformance, 4, 1,
-				64,
-				"The number of rays bounces to determine reverberation for each sound source. More bounces provides more consistent tracing results but takes more time to calculate. Decrease this value if you experience lag spikes when sounds play.");
 		simplerSharedAirspaceSimulation = this.forgeConfig.getBoolean("Simpler Shared Airspace Simulation",
 				categoryPerformance, false,
 				"If true, enables a simpler technique for determining when the player and a sound source share airspace. Might sometimes miss recognizing shared airspace, but it's faster to calculate.");

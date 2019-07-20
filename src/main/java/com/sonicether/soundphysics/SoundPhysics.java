@@ -692,7 +692,7 @@ public class SoundPhysics {
 			final float maxDistance = Config.maxDistance;
 
 			final int numRays = Config.environmentEvaluationRays;
-			final int rayBounces = Config.environmentEvaluationRaysBounces;
+			final int rayBounces = 4;
 
 			final float[] bounceReflectivityRatio = new float[rayBounces];
 
