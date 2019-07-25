@@ -47,8 +47,6 @@ import java.util.TimerTask;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
-
 @Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
 	dependencies = SoundPhysics.deps)
 public class SoundPhysics {
@@ -430,19 +428,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
-		String soundPath = "";
-		// getSoundName() isn't on the server side, and soundName is private
-		if (!onServer) {
-			soundPath = sound.getSoundName().getPath();
-		} else {
-			try {	// field_187506_b = soundName
-				ResourceLocation rl = (ResourceLocation)FieldUtils.readField(sound, "field_187506_b", true);
-				soundPath = rl.getPath();
-			} catch (Exception e) {
-				logError(e.toString());
-			}
-		}
-		if (stepPattern.matcher(soundPath).matches()) {
+		if (stepPattern.matcher(sound.soundName.getPath()).matches()) {
 			return 0;
 		}
 
