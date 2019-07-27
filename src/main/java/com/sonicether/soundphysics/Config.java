@@ -29,6 +29,7 @@ public class Config {
 	public static float underwaterFilter;
 	public static boolean noteBlockEnable;
 	public static float maxDistance;
+	public static boolean dopplerEnabled;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
@@ -126,6 +127,8 @@ public class Config {
 				"If true, note blocks will be processed.");
 		maxDistance = this.forgeConfig.getFloat("Max ray distance", categoryGeneral, 256.0f, 1.0f, 8192.0f,
 				"How far the rays should be traced.");
+		dopplerEnabled = this.forgeConfig.getBoolean("Enable doppler effect", categoryGeneral, true,
+				"REQUIRES RESTART. If true, the doppler effect will be enabled.");
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,
@@ -163,11 +166,11 @@ public class Config {
 
 		// compatibility
 		computronicsPatching = this.forgeConfig.getBoolean("Patch Computronics", categoryCompatibility, true,
-				"MAY REQUIRE RESTART.If true, patches the computronics sound sources so it works with sound physics.");
+				"REQUIRES RESTART. If true, patches the computronics sound sources so it works with sound physics.");
 		irPatching = this.forgeConfig.getBoolean("Patch Immersive Railroading", categoryCompatibility, true,
-				"MAY REQUIRE RESTART.If true, patches the immersive railroading sound sources so it works with sound physics.");
+				"REQUIRES RESTART. If true, patches the immersive railroading sound sources so it works with sound physics.");
 		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
-				"MAY REQUIRE RESTART.If true, Automatically downmix stereo sounds that are loaded to mono");
+				"REQUIRES RESTART. If true, Automatically downmix stereo sounds that are loaded to mono");
 
 		// misc
 		autoSteroDownmixLogging = this.forgeConfig.getBoolean("Stereo downmix Logging", categoryMisc, false,

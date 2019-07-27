@@ -36,6 +36,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Text;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import paulscode.sound.SoundSystemConfig;
+import paulscode.sound.SoundSystem;
+import paulscode.sound.CommandObject;
 import paulscode.sound.SoundBuffer;
 import javax.sound.sampled.AudioFormat;
 import java.nio.ByteBuffer;
@@ -91,6 +93,7 @@ public class SoundPhysics {
 	private static int sendFilter3;
 
 	private static Minecraft mc;
+	private static SoundSystem sndSystem;
 
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
@@ -111,10 +114,14 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void init() {
+	public static void init(SoundSystem snds) {
 		mc = Minecraft.getMinecraft();
-		// I could check if the sound system loaded correctly but that's long and anoying
+		sndSystem = snds;
 		try {
+			if (Config.dopplerEnabled) {
+				sndSystem.changeDopplerFactor(1.0f);
+				AL11.alSpeedOfSound(343.3f); // Should already be 343.3 but just in case
+			}
 			setupEFX();
 			setupThread();
 		} catch (Throwable e) {
@@ -434,13 +441,37 @@ public class SoundPhysics {
 		return entity.getEyeHeight();
 	}
 
-	public static Vec3d computronicsOffset(Vec3d or, TileEntity te, PropertyDirection pd)
-	{
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static Vec3d computronicsOffset(Vec3d or, TileEntity te, PropertyDirection pd) {
 		if (!te.hasWorld()) return or;
 		EnumFacing ef = te.getWorld().getBlockState(te.getPos()).getValue(pd);
 		Vec3d efv = getNormalFromFacing(ef).scale(0.51);
 		return or.add(efv);
 	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static void onSetListener(Entity player, float partial_tick) {
+		float motionX = (float)((player.posX - player.prevPosX) * 20.0d);
+		float motionY = (float)((player.posY - player.prevPosY) * 20.0d);
+		float motionZ = (float)((player.posZ - player.prevPosZ) * 20.0d);
+		sndSystem.setListenerVelocity(motionX,motionY,motionZ);
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static void onIRUpdate(Vec3d velocity, String source, float pitch) {
+		float motionX = (float)(velocity.x * 20.0d);
+		float motionY = (float)(velocity.y * 20.0d);
+		float motionZ = (float)(velocity.z * 20.0d);
+		sndSystem.CommandQueue(new CommandObject(CommandObject.SET_VELOCITY, source, motionX, motionY, motionZ));
+		sndSystem.CommandQueue(new CommandObject(CommandObject.SET_PITCH, source, pitch));
+	}
+
 
 	// Unused
 	private static boolean isSnowingAt(BlockPos position)

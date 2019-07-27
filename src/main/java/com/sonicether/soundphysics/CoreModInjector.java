@@ -3,6 +3,9 @@ package com.sonicether.soundphysics;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -15,6 +18,10 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+
+import org.objectweb.asm.util.TraceMethodVisitor;
+import org.objectweb.asm.util.Printer;
+import org.objectweb.asm.util.Textifier;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
@@ -30,8 +37,9 @@ public class CoreModInjector implements IClassTransformer {
 		if (obfuscated.equals("chm$a")) {
 			// Inside SoundManager.SoundSystemStarterThread
 			InsnList toInject = new InsnList();
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics", "init",
-					"()V", false));
+					"(Lpaulscode/sound/SoundSystem;)V", false));
 
 			// Target method: Constructor
 			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Lchm;)V", Opcodes.INVOKESPECIAL,
@@ -70,6 +78,16 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: playSound, target invocation getClampedVolume
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", -1, toInject, false, 0, 0, false, 0);
+
+			toInject = new InsnList();
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 2));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"onSetListener", "(Lvg;F)V", false));
+
+			// This function has been added by forge so the name isn't obfuscated
+			bytes = patchMethodInClass(obfuscated, bytes, "setListener", "(Lvg;F)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "setListenerOrientation", null, -1, toInject, false, 0, 0, false, 0);
 		} else
 
 		if (obfuscated.equals("paulscode.sound.libraries.SourceLWJGLOpenAL")) {
@@ -346,11 +364,44 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: update
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5);*/
+
+			if (Config.dopplerEnabled) { // IR has its own doppler shift so we remove that and just give the velocity to OpenAL so that it does it itself.
+				toInject = new InsnList();
+
+				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "velocity",
+					"Lbhe;"));
+				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "id",
+					"Ljava/lang/String;"));
+				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+				toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "currentPitch",
+					"F"));
+				toInject.add(new VarInsnNode(Opcodes.FLOAD, 2));
+				toInject.add(new InsnNode(Opcodes.FDIV));
+				toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"onIRUpdate", "(Lbhe;Ljava/lang/String;F)V", false));
+
+				// Target method: update
+				bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "CommandQueue", null, -1, toInject, false, 108, 1, true, 0);
+			}
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
 
 		return bytes;
+	}
+
+	private static Printer printer = new Textifier();
+	private static TraceMethodVisitor mp = new TraceMethodVisitor(printer);
+
+	public static String insnToString(AbstractInsnNode insn){
+		insn.accept(mp);
+		StringWriter sw = new StringWriter();
+		printer.print(new PrintWriter(sw));
+		printer.getText().clear();
+		return sw.toString();
 	}
 
 	private byte[] patchMethodInClass(String className, final byte[] bytes, final String targetMethod,
@@ -377,6 +428,7 @@ public class CoreModInjector implements IClassTransformer {
 				final ListIterator<AbstractInsnNode> nodeIterator = m.instructions.iterator();
 				while (nodeIterator.hasNext()) {
 					AbstractInsnNode currentNode = nodeIterator.next();
+					//log(insnToString(currentNode).replace("\n", ""));
 					if (currentNode.getOpcode() == targetNodeOpcode) {
 
 						if (targetNodeType == AbstractInsnNode.METHOD_INSN) {
@@ -434,12 +486,14 @@ public class CoreModInjector implements IClassTransformer {
 				// If we've found the target, inject the instructions!
 				for (int i = 0; i < nodesToDeleteBefore; i++) {
 					final AbstractInsnNode previousNode = targetNode.getPrevious();
+					//log("Removing Node " + insnToString(previousNode).replace("\n", ""));
 					log("Removing Node " + previousNode.getOpcode());
 					m.instructions.remove(previousNode);
 				}
 
 				for (int i = 0; i < nodesToDeleteAfter; i++) {
 					final AbstractInsnNode nextNode = targetNode.getNext();
+					//log("Removing Node " + insnToString(nextNode).replace("\n", ""));
 					log("Removing Node " + nextNode.getOpcode());
 					m.instructions.remove(nextNode);
 				}
