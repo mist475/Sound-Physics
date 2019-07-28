@@ -118,10 +118,10 @@ public class SoundPhysics {
 		mc = Minecraft.getMinecraft();
 		sndSystem = snds;
 		try {
-			if (Config.dopplerEnabled) {
+			/*if (Config.dopplerEnabled) {
 				sndSystem.changeDopplerFactor(1.0f);
 				AL11.alSpeedOfSound(343.3f); // Should already be 343.3 but just in case
-			}
+			}*/
 			setupEFX();
 			setupThread();
 		} catch (Throwable e) {
@@ -454,23 +454,23 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void onSetListener(Entity player, float partial_tick) {
+	/*public static void onSetListener(Entity player, float partial_tick) {
 		float motionX = (float)((player.posX - player.prevPosX) * 20.0d);
 		float motionY = (float)((player.posY - player.prevPosY) * 20.0d);
 		float motionZ = (float)((player.posZ - player.prevPosZ) * 20.0d);
 		sndSystem.setListenerVelocity(motionX,motionY,motionZ);
-	}
+	}*/
 
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void onIRUpdate(Vec3d velocity, String source, float pitch) {
+	/*public static void onIRUpdate(Vec3d velocity, String source, float pitch) {
 		float motionX = (float)(velocity.x * 20.0d);
 		float motionY = (float)(velocity.y * 20.0d);
 		float motionZ = (float)(velocity.z * 20.0d);
 		sndSystem.CommandQueue(new CommandObject(CommandObject.SET_VELOCITY, source, motionX, motionY, motionZ));
 		sndSystem.CommandQueue(new CommandObject(CommandObject.SET_PITCH, source, pitch));
-	}
+	}*/
 
 
 	// Unused

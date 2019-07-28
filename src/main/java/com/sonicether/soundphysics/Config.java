@@ -29,7 +29,7 @@ public class Config {
 	public static float underwaterFilter;
 	public static boolean noteBlockEnable;
 	public static float maxDistance;
-	public static boolean dopplerEnabled;
+	//public static boolean dopplerEnabled;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
@@ -127,8 +127,8 @@ public class Config {
 				"If true, note blocks will be processed.");
 		maxDistance = this.forgeConfig.getFloat("Max ray distance", categoryGeneral, 256.0f, 1.0f, 8192.0f,
 				"How far the rays should be traced.");
-		dopplerEnabled = this.forgeConfig.getBoolean("Enable doppler effect", categoryGeneral, true,
-				"REQUIRES RESTART. If true, the doppler effect will be enabled.");
+		/*dopplerEnabled = this.forgeConfig.getBoolean("Enable doppler effect", categoryGeneral, true,
+				"REQUIRES RESTART. If true, the doppler effect will be enabled.");*/
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,

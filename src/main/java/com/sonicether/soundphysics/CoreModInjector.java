@@ -79,7 +79,7 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", -1, toInject, false, 0, 0, false, 0);
 
-			toInject = new InsnList();
+			/*toInject = new InsnList();
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
 			toInject.add(new VarInsnNode(Opcodes.FLOAD, 2));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
@@ -87,7 +87,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// This function has been added by forge so the name isn't obfuscated
 			bytes = patchMethodInClass(obfuscated, bytes, "setListener", "(Lvg;F)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setListenerOrientation", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "setListenerOrientation", null, -1, toInject, false, 0, 0, false, 0);*/
 		} else
 
 		if (obfuscated.equals("paulscode.sound.libraries.SourceLWJGLOpenAL")) {
@@ -365,7 +365,7 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5);*/
 
-			if (Config.dopplerEnabled) { // IR has its own doppler shift so we remove that and just give the velocity to OpenAL so that it does it itself.
+			/*if (Config.dopplerEnabled) { // IR has its own doppler shift so we remove that and just give the velocity to OpenAL so that it does it itself.
 				toInject = new InsnList();
 
 				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
@@ -385,7 +385,7 @@ public class CoreModInjector implements IClassTransformer {
 				// Target method: update
 				bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "CommandQueue", null, -1, toInject, false, 108, 1, true, 0);
-			}
+			}*/
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
