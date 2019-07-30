@@ -434,6 +434,7 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final SoundEvent sound) {
+		if (sound == null) return entity.getEyeHeight();
 		if (stepPattern.matcher(sound.soundName.getPath()).matches()) {
 			return 0;
 		}
