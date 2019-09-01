@@ -43,7 +43,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: Constructor
 			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Lchm;)V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "<init>", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "<init>", null, -1, toInject, false, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("chm")) {
@@ -55,7 +55,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: playSound
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 4));
@@ -68,7 +68,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: playSound
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
@@ -77,7 +77,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: playSound, target invocation getClampedVolume
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", -1, toInject, false, 0, 0, false, 0, -1);
 
 			/*toInject = new InsnList();
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
@@ -87,7 +87,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// This function has been added by forge so the name isn't obfuscated
 			bytes = patchMethodInClass(obfuscated, bytes, "setListener", "(Lvg;F)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setListenerOrientation", null, -1, toInject, false, 0, 0, false, 0);*/
+					AbstractInsnNode.METHOD_INSN, "setListenerOrientation", null, -1, toInject, false, 0, 0, false, 0, -1);*/
 		} else
 
 		if (obfuscated.equals("paulscode.sound.libraries.SourceLWJGLOpenAL")) {
@@ -118,7 +118,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: play
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lpaulscode/sound/Channel;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "play", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "play", null, -1, toInject, false, 0, 0, false, 0, -1);
 		} else
 
 		// Convert stero sounds to mono
@@ -138,7 +138,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: loadSound 
 			bytes = patchMethodInClass(obfuscated, bytes, "loadSound", "(Lpaulscode/sound/FilenameURL;)Z", Opcodes.INVOKEINTERFACE,
-					AbstractInsnNode.METHOD_INSN, "cleanup", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "cleanup", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
 
@@ -152,7 +152,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: loadSound 
 			bytes = patchMethodInClass(obfuscated, bytes, "loadSound", "(Lpaulscode/sound/SoundBuffer;Ljava/lang/String;)Z", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "getChannels", null, -1, toInject, true, 0, 0, false, -12);
+					AbstractInsnNode.METHOD_INSN, "getChannels", null, -1, toInject, true, 0, 0, false, -12, -1);
 		} else
 
 		if (obfuscated.equals("paulscode.sound.SoundSystem")) {
@@ -167,7 +167,7 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: newSource
 			bytes = patchMethodInClass(obfuscated, bytes, "newSource",
 					"(ZLjava/lang/String;Ljava/net/URL;Ljava/lang/String;ZFFFIF)V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "<init>", null, -1, toInject, true, 2, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "<init>", null, -1, toInject, true, 2, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("pl")) {
@@ -182,7 +182,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: sendToAllNearExcept
 			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Laed;DDDDILht;)V", Opcodes.DCMPG,
-					AbstractInsnNode.INSN, "", "", -1, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.INSN, "", "", -1, toInject, true, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("vg")) {
@@ -199,7 +199,7 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: playSound
 			// Inside target method, target node: Entity/getSoundCategory
 			bytes = patchMethodInClass(obfuscated, bytes, "a", "(Lqe;FF)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "bK", null, -1, toInject, true, 0, 0, false, -3);
+					AbstractInsnNode.METHOD_INSN, "bK", null, -1, toInject, true, 0, 0, false, -3, -1);
 		} else
 
 		// Fix for computronics's devices
@@ -221,7 +221,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: play 
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Ljava/lang/String;FFFF)V", Opcodes.INVOKESTATIC,
-					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, -1, toInject, true, 0, 0, false, -5);
+					AbstractInsnNode.METHOD_INSN, "alSourceQueueBuffers", null, -1, toInject, true, 0, 0, false, -5, -1);
 
 			toInject = new InsnList();
 
@@ -232,7 +232,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: setHearing
 			bytes = patchMethodInClass(obfuscated, bytes, "setHearing", "(FF)V", Opcodes.FLOAD,
-					AbstractInsnNode.VAR_INSN, "", null, 1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.VAR_INSN, "", null, 1, toInject, false, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("pl.asie.computronics.api.audio.AudioPacket") && Config.computronicsPatching) {
@@ -249,7 +249,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: canHearReceiver
 			bytes = patchMethodInClass(obfuscated, bytes, "canHearReceiver", "(Lnet/minecraft/entity/player/EntityPlayerMP;Lpl/asie/computronics/api/audio/IAudioReceiver;)Z", Opcodes.IMUL,
-					AbstractInsnNode.INSN, "", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.INSN, "", null, -1, toInject, false, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("pl.asie.computronics.tile.TileTapeDrive$1") && Config.computronicsPatching) {
@@ -270,7 +270,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: getSoundPos
 			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
-					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("pl.asie.computronics.tile.TileSpeaker") && Config.computronicsPatching) {
@@ -289,7 +289,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: getSoundPos
 			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
-					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("pl.asie.computronics.tile.TileSpeechBox$1") && Config.computronicsPatching) {
@@ -310,7 +310,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: getSoundPos
 			bytes = patchMethodInClass(obfuscated, bytes, "getSoundPos", "()Lnet/minecraft/util/math/Vec3d;", Opcodes.ARETURN,
-					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("cam72cam.immersiverailroading.sound.ClientSound") && Config.irPatching) {
@@ -329,7 +329,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: play
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lnet/minecraft/util/math/Vec3d;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "update", null, -1, toInject, false, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "update", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
 
@@ -339,7 +339,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: play
 			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lnet/minecraft/util/math/Vec3d;)V", Opcodes.DCMPG,
-					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
 
@@ -349,7 +349,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: update
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESTATIC,
-					AbstractInsnNode.METHOD_INSN, "getDampeningAmount", null, -1, toInject, true, 0, 0, false, 0);
+					AbstractInsnNode.METHOD_INSN, "getDampeningAmount", null, -1, toInject, true, 0, 0, false, 0, -1);
 
 			/*toInject = new InsnList();
 
@@ -363,7 +363,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: update
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5);*/
+					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5, -1);*/
 
 			/*if (Config.dopplerEnabled) { // IR has its own doppler shift so we remove that and just give the velocity to OpenAL so that it does it itself.
 				toInject = new InsnList();
@@ -384,8 +384,32 @@ public class CoreModInjector implements IClassTransformer {
 
 				// Target method: update
 				bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "CommandQueue", null, -1, toInject, false, 108, 1, true, 0);
+					AbstractInsnNode.METHOD_INSN, "CommandQueue", null, -1, toInject, false, 108, 1, true, 0, -1);
 			}*/
+		} else
+
+		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.SoundEffect") && Config.dsPatching) {
+			// Inside SoundEffect
+			InsnList toInject = new InsnList();
+
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/orecruncher/dsurround/client/sound/SoundInstance",
+					"noAttenuation", "()Lcgt$a;", false));
+
+			// Target method: createTrackingSound
+			bytes = patchMethodInClass(obfuscated, bytes, "createTrackingSound", "(Lnet/minecraft/entity/Entity;Z)Lorg/orecruncher/dsurround/client/sound/SoundInstance;", Opcodes.GETSTATIC,
+					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, -1);
+		} else
+
+		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.ConfigSoundInstance") && Config.dsPatching) {
+			// Inside ConfigSoundInstance
+			InsnList toInject = new InsnList();
+
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/orecruncher/dsurround/client/sound/SoundInstance",
+					"noAttenuation", "()Lcgt$a;", false));
+
+			// Target method: ConfigSoundInstance
+			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Ljava/lang/String;F)V", Opcodes.GETSTATIC,
+					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, 1);
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
@@ -408,7 +432,7 @@ public class CoreModInjector implements IClassTransformer {
 			final String targetMethodSignature, final int targetNodeOpcode, final int targetNodeType,
 			final String targetInvocationMethodName, final String targetInvocationMethodSignature, final int targetVarNodeIndex,
 			final InsnList instructionsToInject, final boolean insertBefore, final int nodesToDeleteBefore,
-			final int nodesToDeleteAfter, final boolean deleteTargetNode, final int targetNodeOffset) {
+			final int nodesToDeleteAfter, final boolean deleteTargetNode, final int targetNodeOffset, final int targetNodeNumber) {
 		log("Patching class : "+className);	
 
 		final ClassNode classNode = new ClassNode();
@@ -424,6 +448,7 @@ public class CoreModInjector implements IClassTransformer {
 				log("Inside target method: " + targetMethod);
 				
 				AbstractInsnNode targetNode = null;
+				int targetNodeNb = 0;
 
 				final ListIterator<AbstractInsnNode> nodeIterator = m.instructions.iterator();
 				while (nodeIterator.hasNext()) {
@@ -439,8 +464,8 @@ public class CoreModInjector implements IClassTransformer {
 											|| targetInvocationMethodSignature == null) {
 										log("Found target method invocation for injection: " + targetInvocationMethodName);
 										targetNode = currentNode;
-										// Due to collisions, do not put break
-										// statements here!
+										if (targetNodeNumber >= 0 && targetNodeNb == targetNodeNumber) break;
+										targetNodeNb++;
 									}
 
 								}
@@ -451,16 +476,16 @@ public class CoreModInjector implements IClassTransformer {
 								if (targetVarNodeIndex < 0 || varnode.var == targetVarNodeIndex) {
 									log("Found target var node for injection: " + targetVarNodeIndex);
 									targetNode = currentNode;
-									// Due to collisions, do not put break
-									// statements here!
+									if (targetNodeNumber >= 0 && targetNodeNb == targetNodeNumber) break;
+									targetNodeNb++;
 								}
 							}
 						} else {
 							if (currentNode.getType() == targetNodeType) {
 								log("Found target node for injection: " + targetNodeType);
 								targetNode = currentNode;
-								// Due to collisions, do not put break
-								// statements here!
+								if (targetNodeNumber >= 0 && targetNodeNb == targetNodeNumber) break;
+								targetNodeNb++;
 							}
 						}
 

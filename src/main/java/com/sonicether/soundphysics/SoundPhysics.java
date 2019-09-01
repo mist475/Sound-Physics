@@ -55,7 +55,7 @@ public class SoundPhysics {
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.8";
 	public static final String mcVersion = "1.12.2";
-	public static final String deps = "before:computronics;before:immersiverailroading";  // Dependencies to make sure that SP's config is loaded before patching mods
+	public static final String deps = "";
 
 	public static final Logger logger = LogManager.getLogger(modid);
 

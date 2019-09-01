@@ -1,5 +1,7 @@
 package com.sonicether.soundphysics;
 
+import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +54,7 @@ public class Config {
 	// compatibility
 	public static boolean computronicsPatching;
 	public static boolean irPatching;
+	public static boolean dsPatching;
 	public static boolean autoSteroDownmix;
 	
 	// misc
@@ -70,10 +73,12 @@ public class Config {
 	}
 
 	private Config() {
+		this.forgeConfig = new Configuration(new File(new File(CoreModLoader.mcDir, "config"), SoundPhysics.modid+".cfg"));
+		syncConfig();
 	}
 
 	public void preInit(final FMLPreInitializationEvent event) {
-		this.forgeConfig = new Configuration(event.getSuggestedConfigurationFile());
+		//this.forgeConfig = new Configuration(event.getSuggestedConfigurationFile());
 		syncConfig();
 	}
 
@@ -166,9 +171,11 @@ public class Config {
 
 		// compatibility
 		computronicsPatching = this.forgeConfig.getBoolean("Patch Computronics", categoryCompatibility, true,
-				"REQUIRES RESTART. If true, patches the computronics sound sources so it works with sound physics.");
+				"REQUIRES RESTART. If true, patches the Computronics sound sources so it works with Sound Physics.");
 		irPatching = this.forgeConfig.getBoolean("Patch Immersive Railroading", categoryCompatibility, true,
-				"REQUIRES RESTART. If true, patches the immersive railroading sound sources so it works with sound physics.");
+				"REQUIRES RESTART. If true, patches the Immersive Railroading sound sources so it works with Sound Physics.");
+		dsPatching = this.forgeConfig.getBoolean("Patch Dynamic Surroundings", categoryCompatibility, true,
+				"REQUIRES RESTART. If true, patches Dynamic Surroundings to fix some bugs with Sound Physics.");
 		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
 				"REQUIRES RESTART. If true, Automatically downmix stereo sounds that are loaded to mono");
 
