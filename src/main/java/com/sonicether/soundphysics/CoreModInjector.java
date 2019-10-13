@@ -1,5 +1,6 @@
 package com.sonicether.soundphysics;
 
+import java.util.Map;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -28,9 +29,25 @@ import org.apache.logging.log4j.LogManager;
 
 import net.minecraft.launchwrapper.IClassTransformer;
 
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.ModContainer;
+
 public class CoreModInjector implements IClassTransformer {
 
 	public static final Logger logger = LogManager.getLogger(SoundPhysics.modid+"injector");
+
+	public static boolean shouldPatchDS() {
+		if (Loader.isModLoaded("dsurround")) {
+			Map<String,ModContainer> mods = Loader.instance().getIndexedModList();
+			String version[] = mods.get("dsurround").getVersion().split("\\.");
+			if (version.length < 2) {
+				logError("What the hell, DS's version is not properly formatted ?");
+			} else if (version[1].equals("5")) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	@Override
 	public byte[] transform(final String obfuscated, final String deobfuscated, byte[] bytes) {
@@ -388,7 +405,7 @@ public class CoreModInjector implements IClassTransformer {
 			}*/
 		} else
 
-		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.SoundEffect") && Config.dsPatching) {
+		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.SoundEffect") && Config.dsPatching && shouldPatchDS()) {
 			// Inside SoundEffect
 			InsnList toInject = new InsnList();
 
@@ -400,7 +417,7 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, -1);
 		} else
 
-		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.ConfigSoundInstance") && Config.dsPatching) {
+		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.ConfigSoundInstance") && Config.dsPatching && shouldPatchDS()) {
 			// Inside ConfigSoundInstance
 			InsnList toInject = new InsnList();
 
