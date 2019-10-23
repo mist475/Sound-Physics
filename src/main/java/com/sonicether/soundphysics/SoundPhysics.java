@@ -618,9 +618,9 @@ public class SoundPhysics {
 			final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, name, category);
 			final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
-			float snowFactor = 0.0f;
+			float airAbsorptionFactor = 1.0f;
 
-			if (mc.world.isRaining()) {
+			if (Config.snowAirAbsorptionFactor > 1.0f && mc.world.isRaining()) {
 				final Vec3d middlePos = playerPos.add(soundPos).scale(0.5);
 				final BlockPos playerPosBlock = new BlockPos(playerPos);
 				final BlockPos soundPosBlock = new BlockPos(soundPos);
@@ -628,12 +628,7 @@ public class SoundPhysics {
 				final int snowingPlayer = isSnowingAt(playerPosBlock,false) ? 1 : 0;
 				final int snowingSound = isSnowingAt(soundPosBlock,false) ? 1 : 0;
 				final int snowingMiddle = isSnowingAt(middlePosBlock,false) ? 1 : 0;
-				snowFactor = snowingPlayer * 0.25f + snowingMiddle * 0.5f + snowingSound * 0.25f;
-			}
-
-			float airAbsorptionFactor = 1.0f;
-
-			if (snowFactor > 0.0f) {
+				final float snowFactor = snowingPlayer * 0.25f + snowingMiddle * 0.5f + snowingSound * 0.25f;
 				airAbsorptionFactor = Math.max(Config.snowAirAbsorptionFactor*mc.world.getRainStrength(1.0f)*snowFactor,airAbsorptionFactor);
 			}
 
