@@ -566,7 +566,7 @@ public class SoundPhysics {
 		double tempNormZ = 0;
 
 		if (soundY % 1.0 < 0.001 || stepPattern.matcher(name).matches()) {
-			offsetY = 0.1875;
+			offsetY = 0.225;
 		}
 
 		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches() || 
