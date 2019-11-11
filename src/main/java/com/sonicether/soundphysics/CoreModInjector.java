@@ -330,22 +330,27 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 		} else
 
-		if (obfuscated.equals("cam72cam.immersiverailroading.sound.ClientSound") && Config.irPatching) {
+		if ((obfuscated.equals("cam72cam.immersiverailroading.sound.ClientSound") || obfuscated.equals("cam72cam.mod.sound.ClientSound")) && Config.irPatching) {
 			// Inside ClientSound
 			InsnList toInject = new InsnList();
+
+			final boolean newIR = obfuscated.equals("cam72cam.mod.sound.ClientSound");
+			final String classCS = obfuscated.replace(".","/");
+			final String playDesc = newIR ? "(Lcam72cam/mod/math/Vec3d;)V" : "(Lnet/minecraft/util/math/Vec3d;)V";
+			final String classRes = newIR ? "cam72cam/mod/resource/Identifier" : "nf";
 
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "qg","i", "Lqg;")); // Ambient sound category
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 					"setLastSoundCategory", "(Lqg;)V", false));
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "oggLocation",
-					"Lnf;"));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, classCS, "oggLocation",
+					"L"+classRes+";"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, classRes, "toString", "()Ljava/lang/String;", false));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
 					"setLastSoundName", "(Ljava/lang/String;)V", false));
 
 			// Target method: play
-			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lnet/minecraft/util/math/Vec3d;)V", Opcodes.INVOKEVIRTUAL,
+			bytes = patchMethodInClass(obfuscated, bytes, "play", playDesc, Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "update", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
@@ -355,7 +360,7 @@ public class CoreModInjector implements IClassTransformer {
 			toInject.add(new InsnNode(Opcodes.DMUL));
 
 			// Target method: play
-			bytes = patchMethodInClass(obfuscated, bytes, "play", "(Lnet/minecraft/util/math/Vec3d;)V", Opcodes.DCMPG,
+			bytes = patchMethodInClass(obfuscated, bytes, "play", playDesc, Opcodes.DCMPG,
 					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
@@ -365,8 +370,8 @@ public class CoreModInjector implements IClassTransformer {
 			toInject.add(new InsnNode(Opcodes.FMUL));
 
 			// Target method: update
-			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESTATIC,
-					AbstractInsnNode.METHOD_INSN, "getDampeningAmount", null, -1, toInject, true, 0, 0, false, 0, -1);
+			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.FMUL,
+					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 
 			/*toInject = new InsnList();
 
