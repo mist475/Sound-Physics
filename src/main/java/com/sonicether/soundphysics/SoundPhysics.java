@@ -67,6 +67,7 @@ public class SoundPhysics {
 	private static final Pattern uiPattern = Pattern.compile(".*\\/ui\\/.*");
 	private static final Pattern clickPattern = Pattern.compile(".*random.click.*");
 	private static final Pattern noteBlockPattern = Pattern.compile(".*block.note.*");
+	private static final Pattern betweenlandsPattern = Pattern.compile("thebetweenlands:sounds\\/rift_.*\\.ogg");
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
@@ -403,7 +404,8 @@ public class SoundPhysics {
 	public static SoundBuffer onLoadSound(SoundBuffer buff, String filename) {
 		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
 		if (mc.player == null || mc.world == null || lastSoundCategory == SoundCategory.RECORDS
-		| lastSoundCategory == SoundCategory.MUSIC || uiPattern.matcher(filename).matches() || clickPattern.matcher(filename).matches()) {
+		|| lastSoundCategory == SoundCategory.MUSIC || uiPattern.matcher(filename).matches() || clickPattern.matcher(filename).matches()
+		|| betweenlandsPattern.matcher(filename).matches()) {
 			if (Config.autoSteroDownmixLogging) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
 			return buff;
 		}
