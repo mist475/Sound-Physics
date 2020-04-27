@@ -430,19 +430,19 @@ public class CoreModInjector implements IClassTransformer {
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/orecruncher/dsurround/client/sound/SoundInstance",
 					"noAttenuation", "()Lcgt$a;", false));
 
-			// Target method: ConfigSoundInstance
+			// Target method: constructor
 			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Ljava/lang/String;F)V", Opcodes.GETSTATIC,
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, 1);
 		} else
 
 		if (obfuscated.equals("com.mushroom.midnight.client.SoundReverbHandler") && Config.midnightPatching) {
-			// Inside ConfigSoundInstance
+			// Inside SoundReverbHandler
 			InsnList toInject = new InsnList();
 
 			toInject.add(new InsnNode(Opcodes.RETURN));
 			toInject.add(new FrameNode(Opcodes.F_SAME,0,new Object[] {},0,new Object[] {}));
 
-			// Target method: ConfigSoundInstance
+			// Target method: onPlaySound
 			bytes = patchMethodInClass(obfuscated, bytes, "onPlaySound", "(I)V", Opcodes.GETSTATIC,
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, false, 0, 0);
 		}
