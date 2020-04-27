@@ -19,6 +19,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 
 import org.objectweb.asm.util.TraceMethodVisitor;
 import org.objectweb.asm.util.Printer;
@@ -432,6 +433,18 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: ConfigSoundInstance
 			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Ljava/lang/String;F)V", Opcodes.GETSTATIC,
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, 1);
+		} else
+
+		if (obfuscated.equals("com.mushroom.midnight.client.SoundReverbHandler") && Config.midnightPatching) {
+			// Inside ConfigSoundInstance
+			InsnList toInject = new InsnList();
+
+			toInject.add(new InsnNode(Opcodes.RETURN));
+			toInject.add(new FrameNode(Opcodes.F_SAME,0,new Object[] {},0,new Object[] {}));
+
+			// Target method: ConfigSoundInstance
+			bytes = patchMethodInClass(obfuscated, bytes, "onPlaySound", "(I)V", Opcodes.GETSTATIC,
+					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, false, 0, 0);
 		}
 
 		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");

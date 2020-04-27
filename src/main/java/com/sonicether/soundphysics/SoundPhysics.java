@@ -903,6 +903,7 @@ public class SoundPhysics {
 		AL10.alSourcei(sourceID, EFX10.AL_DIRECT_FILTER, directFilter0);
 
 		AL10.alSourcef(sourceID, EFX10.AL_AIR_ABSORPTION_FACTOR, MathHelper.clamp(Config.airAbsorption * airAbsorptionFactor,0.0f,10.0f));
+		checkErrorLog("Error while setting environment for source: " + sourceID);
 	}
 
 	/**
@@ -945,6 +946,7 @@ public class SoundPhysics {
 
 		// Attach updated effect object
 		EFX10.alAuxiliaryEffectSloti(auxFXSlot, EFX10.AL_EFFECTSLOT_EFFECT, reverbSlot);
+		checkErrorLog("Error while assigning reverb effect slot: " + reverbSlot);
 	}
 
 	public static void log(final String message) {
