@@ -1,11 +1,6 @@
 package com.sonicether.soundphysics;
 
 import java.util.regex.Pattern;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.ListIterator;
-import java.util.Collections;
-import java.nio.FloatBuffer;
 
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -13,7 +8,6 @@ import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.ALCcontext;
 import org.lwjgl.openal.ALCdevice;
 import org.lwjgl.openal.EFX10;
-import org.lwjgl.BufferUtils;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -32,30 +26,23 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.Text;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundSystem;
-import paulscode.sound.CommandObject;
 import paulscode.sound.SoundBuffer;
 import javax.sound.sampled.AudioFormat;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Timer;  
-import java.util.TimerTask;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
-@Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
-	dependencies = SoundPhysics.deps)
+@Mod(modid = SoundPhysics.modid, clientSideOnly = true, acceptedMinecraftVersions = SoundPhysics.mcVersion,
+	 version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory")
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
 	public static final String version = "1.0.8-1";
 	public static final String mcVersion = "1.12.2";
-	public static final String deps = "";
 
 	public static final Logger logger = LogManager.getLogger(modid);
 
@@ -99,11 +86,6 @@ public class SoundPhysics {
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
 
-	private static ProcThread proc_thread;
-	private static volatile boolean thread_alive;
-	private static volatile boolean thread_signal_death;
-	private static volatile List<Source> source_list;
-
 	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
 	// NOT REMOVE!
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
@@ -119,152 +101,10 @@ public class SoundPhysics {
 		mc = Minecraft.getMinecraft();
 		sndSystem = snds;
 		try {
-			/*if (Config.dopplerEnabled) {
-				sndSystem.changeDopplerFactor(1.0f);
-				AL11.alSpeedOfSound(343.3f); // Should already be 343.3 but just in case
-			}*/
 			setupEFX();
-			setupThread();
 		} catch (Throwable e) {
-			logError("Failed to init EFX or thread");
+			logError("Failed to init EFX");
 			logError(e.toString());
-		}
-	}
-
-	public static class Source {
-		public int sourceID;
-		public float posX;
-		public float posY;
-		public float posZ;
-		public SoundCategory category;
-		public String name;
-		public int frequency;
-		public int size;
-		public int bufferID;
-
-		public Source(int sid,float px,float py,float pz,SoundCategory cat,String n) {
-			this.sourceID = sid;
-			this.posX = px;
-			this.posY = py;
-			this.posZ = pz;
-			this.category = cat;
-			this.name = n;
-			bufferID = AL10.alGetSourcei(sid, AL10.AL_BUFFER);
-			size = AL10.alGetBufferi(bufferID, AL10.AL_SIZE);
-			frequency = AL10.alGetBufferi(bufferID, AL10.AL_FREQUENCY);
-		}
-	}
-
-	public static class ProcThread extends Thread {
-		@Override
-		public synchronized void run() {
-			while (thread_alive) {
-				while (!Config.dynamicEnvironementEvalutaion) {
-					try {
-						Thread.sleep(1000);
-					} catch (Exception e) {
-						logError(String.valueOf(e));
-					}
-				}
-				synchronized (source_list) {
-					//log("Updating env " + String.valueOf(source_list.size()));
-					ListIterator<Source> iter = source_list.listIterator();
-					while (iter.hasNext()) {
-						Source source = iter.next();
-						//log("Updating sound '" + source.name + "' SourceID:" + String.valueOf(source.sourceID));
-						//boolean pl = sndHandler.isSoundPlaying(source.sound);
-						//FloatBuffer pos = BufferUtils.createFloatBuffer(3);
-						//AL10.alGetSource(source.sourceID,AL10.AL_POSITION,pos);
-						//To try ^
-						int state = AL10.alGetSourcei(source.sourceID, AL10.AL_SOURCE_STATE);
-						//int byteoff = AL10.alGetSourcei(source.sourceID, AL11.AL_BYTE_OFFSET);
-						//boolean finished = source.size == byteoff;
-						if (state == AL10.AL_PLAYING) {
-							FloatBuffer pos = BufferUtils.createFloatBuffer(3);
-							AL10.alGetSource(source.sourceID,AL10.AL_POSITION,pos);
-							source.posX = pos.get(0);
-							source.posY = pos.get(1);
-							source.posZ = pos.get(2);
-							evaluateEnvironment(source.sourceID,source.posX,source.posY,source.posZ,source.category,source.name);
-						} else /*if (state == AL10.AL_STOPPED)*/ {
-							iter.remove();
-						}
-					}
-				}
-				try {
-					Thread.sleep(1000/Config.dynamicEnvironementEvalutaionFrequency);
-				} catch (Exception e) {
-					logError(String.valueOf(e));
-				}
-			}
-			thread_signal_death = true;
-		}
-	}
-
-	public static void source_check_add(Source s) {
-		synchronized (source_list) {
-			ListIterator<Source> iter = source_list.listIterator();
-			while (iter.hasNext()) {
-				Source sn = iter.next();
-				if (sn.sourceID == s.sourceID) {
-					sn.posX = s.posX;
-					sn.posY = s.posY;
-					sn.posZ = s.posZ;
-					sn.category = s.category;
-					sn.name = s.name;
-					return;
-				}
-			}
-			source_list.add(s);
-		}
-	}
-
-	@Mod.EventBusSubscriber
-	public static class DebugDisplayEventHandler {
-		@SubscribeEvent
-		public static void onDebugOverlay(RenderGameOverlayEvent.Text event) {
-			if (mc != null && mc.gameSettings.showDebugInfo && Config.dynamicEnvironementEvalutaion && Config.debugInfoShow) {
-				event.getLeft().add("");
-				event.getLeft().add("[SoundPhysics] "+String.valueOf(source_list.size())+" Sources");
-				event.getLeft().add("[SoundPhysics] Source list :");
-				synchronized (source_list) {
-					ListIterator<Source> iter = source_list.listIterator();
-					while (iter.hasNext())  {
-						Source s = iter.next();
-						Vec3d tmp = new Vec3d(s.posX,s.posY,s.posZ);
-						event.getLeft().add(String.valueOf(s.sourceID)+"-"+s.category.toString()+"-"+s.name+"-"+tmp.toString());
-						/*int buffq = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_QUEUED);
-						int buffp = AL10.alGetSourcei(s.sourceID, AL10.AL_BUFFERS_PROCESSED);
-						int sampoff = AL10.alGetSourcei(s.sourceID, AL11.AL_SAMPLE_OFFSET);
-						int byteoff = AL10.alGetSourcei(s.sourceID, AL11.AL_BYTE_OFFSET);
-						String k = "";
-						if (sampoff!=0) {
-							//k = String.valueOf(sampoff)+"/"+String.valueOf((byteoff/sampoff)*size)+" ";
-							k = String.valueOf((float)sampoff/(float)s.frequency)+"/"+String.valueOf((float)((byteoff/sampoff)*s.size)/(float)s.frequency)+" ";
-						} else {
-							k = "0/? ";
-						}
-						event.getLeft().add(k+String.valueOf(buffp)+"/"+String.valueOf(buffq)+" "+String.valueOf(s.bufferID));
-						event.getLeft().add("----");*/
-					}
-				}
-			}
-		}
-	}
-
-	private static synchronized void setupThread() {
-		if (source_list == null) source_list = Collections.synchronizedList(new ArrayList<Source>());
-		else source_list.clear();
-
-		/*if (proc_thread != null) {
-			thread_signal_death = false;
-			thread_alive = false;
-			while (!thread_signal_death);
-		}*/
-		if (proc_thread == null) {
-			proc_thread = new ProcThread();
-			thread_alive = true;
-			proc_thread.start();
 		}
 	}
 
@@ -390,12 +230,6 @@ public class SoundPhysics {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
 		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
-		if (!Config.dynamicEnvironementEvalutaion) return;
-		if ((mc.player == null || mc.world == null || posY <= 0 || soundCat == SoundCategory.RECORDS 
-		|| soundCat == SoundCategory.MUSIC) || (Config.skipRainOcclusionTracing && rainPattern.matcher(soundName).matches())) return;
-		if (clickPattern.matcher(soundName).matches() || uiPattern.matcher(soundName).matches()) return;
-		Source tmp = new Source(sourceID,posX,posY,posZ,soundCat,soundName);
-		source_check_add(tmp);
 	}
 
 	/**
@@ -453,28 +287,6 @@ public class SoundPhysics {
 		Vec3d efv = getNormalFromFacing(ef).scale(0.51);
 		return or.add(efv);
 	}
-
-	/**
-	 * CALLED BY ASM INJECTED CODE!
-	 */
-	/*public static void onSetListener(Entity player, float partial_tick) {
-		float motionX = (float)((player.posX - player.prevPosX) * 20.0d);
-		float motionY = (float)((player.posY - player.prevPosY) * 20.0d);
-		float motionZ = (float)((player.posZ - player.prevPosZ) * 20.0d);
-		sndSystem.setListenerVelocity(motionX,motionY,motionZ);
-	}*/
-
-	/**
-	 * CALLED BY ASM INJECTED CODE!
-	 */
-	/*public static void onIRUpdate(Vec3d velocity, String source, float pitch) {
-		float motionX = (float)(velocity.x * 20.0d);
-		float motionY = (float)(velocity.y * 20.0d);
-		float motionZ = (float)(velocity.z * 20.0d);
-		sndSystem.CommandQueue(new CommandObject(CommandObject.SET_VELOCITY, source, motionX, motionY, motionZ));
-		sndSystem.CommandQueue(new CommandObject(CommandObject.SET_PITCH, source, pitch));
-	}*/
-
 
 	// Unused
 	private static boolean isSnowingAt(BlockPos position)
@@ -633,22 +445,6 @@ public class SoundPhysics {
 				final float snowFactor = snowingPlayer * 0.25f + snowingMiddle * 0.5f + snowingSound * 0.25f;
 				airAbsorptionFactor = Math.max(Config.snowAirAbsorptionFactor*mc.world.getRainStrength(1.0f)*snowFactor,airAbsorptionFactor);
 			}
-
-			/*final double distance = playerPos.distanceTo(soundPos);
-			final double time = (distance/343.3)*1000;
-			AL10.alSourcePause(sourceID);
-			log("paused, time "+String.valueOf(time));
-
-			new java.util.Timer().schedule(
-				new java.util.TimerTask() {
-					@Override
-					public void run() {
-						log("play, time "+String.valueOf(time));
-						AL10.alSourcePlay(sourceID);
-					}
-				},
-				(long)time
-			);*/
 
 			Vec3d rayOrigin = soundPos;
 

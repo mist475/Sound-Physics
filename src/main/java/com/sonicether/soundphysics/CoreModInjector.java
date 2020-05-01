@@ -96,16 +96,6 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: playSound, target invocation getClampedVolume
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", -1, toInject, false, 0, 0, false, 0, -1);
-
-			/*toInject = new InsnList();
-			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			toInject.add(new VarInsnNode(Opcodes.FLOAD, 2));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"onSetListener", "(Lvg;F)V", false));
-
-			// This function has been added by forge so the name isn't obfuscated
-			bytes = patchMethodInClass(obfuscated, bytes, "setListener", "(Lvg;F)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setListenerOrientation", null, -1, toInject, false, 0, 0, false, 0, -1);*/
 		} else
 
 		if (obfuscated.equals("paulscode.sound.libraries.SourceLWJGLOpenAL")) {
@@ -374,6 +364,8 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.FMUL,
 					AbstractInsnNode.INSN, "", null, -1, toInject, true, 0, 0, false, 0, -1);
 
+			// Commented code to change the position of the sound source depending on the scale of the train
+			// Could be implemented but needs more work/proper positions for like the wheels and stuff
 			/*toInject = new InsnList();
 
 			toInject.add(new LdcInsnNode(1.75d));
@@ -387,28 +379,6 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: update
 			bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5, -1);*/
-
-			/*if (Config.dopplerEnabled) { // IR has its own doppler shift so we remove that and just give the velocity to OpenAL so that it does it itself.
-				toInject = new InsnList();
-
-				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "velocity",
-					"Lbhe;"));
-				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "id",
-					"Ljava/lang/String;"));
-				toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-				toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "cam72cam/immersiverailroading/sound/ClientSound", "currentPitch",
-					"F"));
-				toInject.add(new VarInsnNode(Opcodes.FLOAD, 2));
-				toInject.add(new InsnNode(Opcodes.FDIV));
-				toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"onIRUpdate", "(Lbhe;Ljava/lang/String;F)V", false));
-
-				// Target method: update
-				bytes = patchMethodInClass(obfuscated, bytes, "update", "()V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "CommandQueue", null, -1, toInject, false, 108, 1, true, 0, -1);
-			}*/
 		} else
 
 		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.SoundEffect") && Config.dsPatching && shouldPatchDS()) {
@@ -447,7 +417,7 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, false, 0, 0);
 		}
 
-		//System.out.println("[SP Inject] "+obfuscated+" ("+deobfuscated+")");
+		//log("Finished processing class: '"+obfuscated+"' ('"+deobfuscated+"')");
 
 		return bytes;
 	}

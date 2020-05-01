@@ -31,14 +31,11 @@ public class Config {
 	public static float underwaterFilter;
 	public static boolean noteBlockEnable;
 	public static float maxDistance;
-	//public static boolean dopplerEnabled;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
 	public static int environmentEvaluationRays;
 	public static boolean simplerSharedAirspaceSimulation;
-	public static boolean dynamicEnvironementEvalutaion;
-	public static int dynamicEnvironementEvalutaionFrequency;
 
 	// block properties
 	public static float stoneReflectivity;
@@ -60,7 +57,6 @@ public class Config {
 	
 	// misc
 	public static boolean autoSteroDownmixLogging;
-	public static boolean debugInfoShow;
 	public static boolean injectorLogging;
 
 	private static final String categoryGeneral = "General";
@@ -133,8 +129,6 @@ public class Config {
 				"If true, note blocks will be processed.");
 		maxDistance = this.forgeConfig.getFloat("Max ray distance", categoryGeneral, 256.0f, 1.0f, 8192.0f,
 				"How far the rays should be traced.");
-		/*dopplerEnabled = this.forgeConfig.getBoolean("Enable doppler effect", categoryGeneral, true,
-				"REQUIRES RESTART. If true, the doppler effect will be enabled.");*/
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,
@@ -145,10 +139,6 @@ public class Config {
 		simplerSharedAirspaceSimulation = this.forgeConfig.getBoolean("Simpler Shared Airspace Simulation",
 				categoryPerformance, false,
 				"If true, enables a simpler technique for determining when the player and a sound source share airspace. Might sometimes miss recognizing shared airspace, but it's faster to calculate.");
-		dynamicEnvironementEvalutaion = this.forgeConfig.getBoolean("Dynamic environment evaluation", categoryPerformance, false,
-				"WARNING it's implemented really badly so i'd recommend not always using it.If true, the environment will keep getting evaluated for every sound that is currently playing. This may affect performance");
-		dynamicEnvironementEvalutaionFrequency = this.forgeConfig.getInt("Frequency of environment evaluation", categoryPerformance, 30, 1, 60,
-				"The frequency at witch to update environment of sounds if dynamic environment evaluation is enabled");
 
 		// material properties
 		stoneReflectivity = this.forgeConfig.getFloat("Stone Reflectivity", categoryMaterialProperties, 0.95f, 0.0f,
@@ -185,8 +175,6 @@ public class Config {
 		// misc
 		autoSteroDownmixLogging = this.forgeConfig.getBoolean("Stereo downmix Logging", categoryMisc, false,
 				"If true, Prints sound name and format of the sounds that get converted");
-		debugInfoShow = this.forgeConfig.getBoolean("Dynamic env. info in F3", categoryMisc, false,
-				"If true, Shows sources currently playing in the F3 debug info");
 		injectorLogging = this.forgeConfig.getBoolean("Injector Logging", categoryMisc, false,
 				"If true, Logs debug info about the injector");
 
