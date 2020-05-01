@@ -229,7 +229,7 @@ public class SoundPhysics {
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
 		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
-		evaluateEnvironment(sourceID, posX, posY, posZ,soundCat,soundName);
+		evaluateEnvironment(sourceID, posX, posY, posZ, soundCat, soundName);
 	}
 
 	/**
@@ -237,9 +237,8 @@ public class SoundPhysics {
 	 */
 	public static SoundBuffer onLoadSound(SoundBuffer buff, String filename) {
 		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
-		if (mc.player == null || mc.world == null || lastSoundCategory == SoundCategory.RECORDS
-		|| lastSoundCategory == SoundCategory.MUSIC || uiPattern.matcher(filename).matches() || clickPattern.matcher(filename).matches()
-		|| betweenlandsPattern.matcher(filename).matches()) {
+		if (mc.player == null || mc.world == null || lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC ||
+			uiPattern.matcher(filename).matches() || clickPattern.matcher(filename).matches() || betweenlandsPattern.matcher(filename).matches()) {
 			if (Config.autoSteroDownmixLogging) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
 			return buff;
 		}
@@ -288,32 +287,12 @@ public class SoundPhysics {
 		return or.add(efv);
 	}
 
-	// Unused
-	private static boolean isSnowingAt(BlockPos position)
-	{
-		return isSnowingAt(position, true);
-	}
-
 	// Copy of isRainingAt
-	private static boolean isSnowingAt(BlockPos position, boolean check_rain)
-	{
-		if (check_rain && !mc.world.isRaining()) {
+	private static boolean isSnowingAt(BlockPos position, boolean check_rain) {
+		if ((check_rain && !mc.world.isRaining()) || !mc.world.canSeeSky(position) ||
+			mc.world.getPrecipitationHeight(position).getY() > position.getY()) {
 			return false;
-		}
-		else if (!mc.world.canSeeSky(position))
-		{
-			return false;
-		}
-		else if (mc.world.getPrecipitationHeight(position).getY() > position.getY())
-		{
-			return false;
-		}
-		else
-		{
-			/*boolean cansnow = mc.world.canSnowAt(position, false);
-			if (mc.world.getBiome(position).getEnableSnow() && cansnow) return true;
-			else if (cansnow) return true;
-			else return false;*/
+		} else {
 			return mc.world.canSnowAt(position, false) || mc.world.getBiome(position).getEnableSnow();
 		}
 	}
@@ -410,8 +389,7 @@ public class SoundPhysics {
 	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ, final SoundCategory category, final String name) {
 		try {
-			if (mc.player == null || mc.world == null || posY <= 0 || category == SoundCategory.RECORDS
-					|| category == SoundCategory.MUSIC) {
+			if (mc.player == null || mc.world == null || posY <= 0 || category == SoundCategory.RECORDS || category == SoundCategory.MUSIC) {
 				// posY <= 0 as a condition has to be there: Ingame
 				// menu clicks do have a player and world present
 				setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
@@ -762,24 +740,24 @@ public class SoundPhysics {
 		String errorName;
 
 		switch (error) {
-		case AL10.AL_INVALID_NAME:
-			errorName = "AL_INVALID_NAME";
-			break;
-		case AL10.AL_INVALID_ENUM:
-			errorName = "AL_INVALID_ENUM";
-			break;
-		case AL10.AL_INVALID_VALUE:
-			errorName = "AL_INVALID_VALUE";
-			break;
-		case AL10.AL_INVALID_OPERATION:
-			errorName = "AL_INVALID_OPERATION";
-			break;
-		case AL10.AL_OUT_OF_MEMORY:
-			errorName = "AL_OUT_OF_MEMORY";
-			break;
-		default:
-			errorName = Integer.toString(error);
-			break;
+			case AL10.AL_INVALID_NAME:
+				errorName = "AL_INVALID_NAME";
+				break;
+			case AL10.AL_INVALID_ENUM:
+				errorName = "AL_INVALID_ENUM";
+				break;
+			case AL10.AL_INVALID_VALUE:
+				errorName = "AL_INVALID_VALUE";
+				break;
+			case AL10.AL_INVALID_OPERATION:
+				errorName = "AL_INVALID_OPERATION";
+				break;
+			case AL10.AL_OUT_OF_MEMORY:
+				errorName = "AL_OUT_OF_MEMORY";
+				break;
+			default:
+				errorName = Integer.toString(error);
+				break;
 		}
 
 		logError(errorMessage + " OpenAL error " + errorName);

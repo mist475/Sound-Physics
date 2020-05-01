@@ -425,7 +425,7 @@ public class CoreModInjector implements IClassTransformer {
 	private static Printer printer = new Textifier();
 	private static TraceMethodVisitor mp = new TraceMethodVisitor(printer);
 
-	public static String insnToString(AbstractInsnNode insn){
+	public static String insnToString(AbstractInsnNode insn) {
 		insn.accept(mp);
 		StringWriter sw = new StringWriter();
 		printer.print(new PrintWriter(sw));
