@@ -41,8 +41,8 @@ import org.apache.logging.log4j.LogManager;
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.8-1";
-	public static final String mcVersion = "1.12.2";
+	public static final String version = "${version}";
+	public static final String mcVersion = "${mc_version}";
 
 	public static final Logger logger = LogManager.getLogger(modid);
 
