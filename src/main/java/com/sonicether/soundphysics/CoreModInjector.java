@@ -73,7 +73,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: playSound
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, false, 0, 0, false, 0, -1);
+					AbstractInsnNode.METHOD_INSN, "setPitch", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 4));
@@ -86,16 +86,17 @@ public class CoreModInjector implements IClassTransformer {
 
 			// Target method: playSound
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, false, 0, 0, false, 0, -1);
+					AbstractInsnNode.METHOD_INSN, "setPitch", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
-			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"globalVolumeMultiplier", "F"));
-			toInject.add(new InsnNode(Opcodes.FMUL));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cgt", "j", "()F", true));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"applyGlobalVolumeMultiplier", "(FF)F", false));
 
-			// Target method: playSound, target invocation getClampedVolume
-			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKESPECIAL,
-					AbstractInsnNode.METHOD_INSN, "e", "(Lcgt;)F", -1, toInject, false, 0, 0, false, 0, -1);
+			// Target method: playSound, target invocation setVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, true, 0, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("paulscode.sound.libraries.SourceLWJGLOpenAL")) {

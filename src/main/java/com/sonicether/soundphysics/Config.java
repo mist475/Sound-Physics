@@ -22,6 +22,7 @@ public class Config {
 	// general
 	public static float rolloffFactor;
 	public static float globalReverbGain;
+	public static float globalVolumeMultiplier;
 	public static float globalReverbBrightness;
 	public static float soundDistanceAllowance;
 	public static float globalBlockAbsorption;
@@ -31,6 +32,7 @@ public class Config {
 	public static float underwaterFilter;
 	public static boolean noteBlockEnable;
 	public static float maxDistance;
+	public static boolean volumeMulOnlyAffected;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
@@ -106,6 +108,8 @@ public class Config {
 		// General
 		rolloffFactor = this.forgeConfig.getFloat("Attenuation Factor", categoryGeneral, 1.0f, 0.2f, 1.0f,
 				"Affects how quiet a sound gets based on distance. Lower values mean distant sounds are louder. 1.0 is the physically correct value.");
+		globalVolumeMultiplier = this.forgeConfig.getFloat("Global Volume Multiplier", categoryGeneral, 4.0f, 0.1f, 8.0f,
+				"The global volume multiplier of all sounds.");
 		globalReverbGain = this.forgeConfig.getFloat("Global Reverb Gain", categoryGeneral, 1.0f, 0.1f, 2.0f,
 				"The global volume of simulated reverberations.");
 		globalReverbBrightness = this.forgeConfig.getFloat("Global Reverb Brightness", categoryGeneral, 1.0f, 0.1f,
@@ -129,6 +133,8 @@ public class Config {
 				"If true, note blocks will be processed.");
 		maxDistance = this.forgeConfig.getFloat("Max ray distance", categoryGeneral, 256.0f, 1.0f, 8192.0f,
 				"How far the rays should be traced.");
+		volumeMulOnlyAffected = this.forgeConfig.getBoolean("Volume Multiplier Only On Affected", categoryGeneral, true,
+				"If true, the global volume multiplier will only be applied to affected sounds (so not to the ui sounds for example).");
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,

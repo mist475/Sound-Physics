@@ -55,6 +55,7 @@ public class SoundPhysics {
 	private static final Pattern clickPattern = Pattern.compile(".*random.click.*");
 	private static final Pattern noteBlockPattern = Pattern.compile(".*block.note.*");
 	private static final Pattern betweenlandsPattern = Pattern.compile("thebetweenlands:sounds\\/rift_.*\\.ogg");
+	private static final Pattern travelPattern = Pattern.compile(".*portal\\/travel*.*");
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
@@ -90,7 +91,7 @@ public class SoundPhysics {
 	// NOT REMOVE!
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
 	public static float globalRolloffFactor = Config.rolloffFactor;
-	public static float globalVolumeMultiplier = 4.0f;
+	public static float globalVolumeMultiplier = Config.globalVolumeMultiplier;
 	public static float globalReverbMultiplier = 0.7f * Config.globalReverbGain;
 	public static double soundDistanceAllowance = Config.soundDistanceAllowance;
 
@@ -112,6 +113,7 @@ public class SoundPhysics {
 		globalRolloffFactor = Config.rolloffFactor;
 		globalReverbMultiplier = 0.7f * Config.globalReverbGain;
 		soundDistanceAllowance = Config.soundDistanceAllowance;
+		globalVolumeMultiplier = Config.globalVolumeMultiplier;
 
 		if (auxFXSlot0 != 0) {
 			// Set the global reverb parameters and apply them to the effect and
@@ -190,7 +192,11 @@ public class SoundPhysics {
 	 * CALLED BY ASM INJECTED CODE!
 	 */
 	public static void setLastSoundCategory(final SoundCategory sc) {
-		lastSoundCategory = sc;
+		if (Config.noteBlockEnable && sc == SoundCategory.RECORDS && noteBlockPattern.matcher(lastSoundName).matches()) {
+			lastSoundCategory = SoundCategory.BLOCKS;
+		} else {
+			lastSoundCategory = sc;
+		}
 	}
 
 	/**
@@ -205,6 +211,18 @@ public class SoundPhysics {
 	 */
 	public static void setLastSoundName(final String soundName) {
 		lastSoundName = soundName;
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static float applyGlobalVolumeMultiplier(final float volume, final float posY) {
+		if (!Config.volumeMulOnlyAffected || !(mc.player == null || mc.world == null || posY <= 0 ||
+			lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC)) {
+			return volume*globalVolumeMultiplier;
+		} else {
+			return volume;
+		}
 	}
 
 	/**
@@ -228,7 +246,6 @@ public class SoundPhysics {
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
-		if (Config.noteBlockEnable && soundCat == SoundCategory.RECORDS && noteBlockPattern.matcher(soundName).matches()) soundCat = SoundCategory.BLOCKS;
 		evaluateEnvironment(sourceID, posX, posY, posZ, soundCat, soundName);
 	}
 
@@ -238,7 +255,8 @@ public class SoundPhysics {
 	public static SoundBuffer onLoadSound(SoundBuffer buff, String filename) {
 		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
 		if (mc.player == null || mc.world == null || lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC ||
-			uiPattern.matcher(filename).matches() || clickPattern.matcher(filename).matches() || betweenlandsPattern.matcher(filename).matches()) {
+			uiPattern.matcher(filename).matches() || clickPattern.matcher(filename).matches() || betweenlandsPattern.matcher(filename).matches() ||
+			travelPattern.matcher(filename).matches()) {
 			if (Config.autoSteroDownmixLogging) log("Not converting sound '"+filename+"'("+buff.audioFormat.toString()+")");
 			return buff;
 		}
