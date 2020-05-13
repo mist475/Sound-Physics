@@ -175,7 +175,7 @@ public class Config {
 				"REQUIRES RESTART. If true, patches Dynamic Surroundings to fix some bugs with Sound Physics.");
 		midnightPatching = this.forgeConfig.getBoolean("Patch The Midnight", categoryCompatibility, true,
 				"REQUIRES RESTART. If true, patches The Midnight to disable redundant functionality that causes some problems.");
-		autoSteroDownmix = this.forgeConfig.getBoolean("Auto stereo downmix", categoryCompatibility, true,
+		autoSteroDownmix = this.forgeConfig.getBoolean("Auto Stereo Downmix", categoryCompatibility, true,
 				"REQUIRES RESTART. If true, Automatically downmix stereo sounds that are loaded to mono");
 
 		// misc

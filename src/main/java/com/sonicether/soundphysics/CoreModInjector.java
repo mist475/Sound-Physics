@@ -358,7 +358,7 @@ public class CoreModInjector implements IClassTransformer {
 			toInject = new InsnList();
 
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"globalVolumeMultiplier", "F"));
+					"globalVolumeMultiplier0", "F"));
 			toInject.add(new InsnNode(Opcodes.FMUL));
 
 			// Target method: update

@@ -91,7 +91,7 @@ public class SoundPhysics {
 	// NOT REMOVE!
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
 	public static float globalRolloffFactor = Config.rolloffFactor;
-	public static float globalVolumeMultiplier = Config.globalVolumeMultiplier;
+	public static float globalVolumeMultiplier0 = Config.globalVolumeMultiplier; // 0 is because of DS trying to read the value of the original name
 	public static float globalReverbMultiplier = 0.7f * Config.globalReverbGain;
 	public static double soundDistanceAllowance = Config.soundDistanceAllowance;
 
@@ -113,7 +113,7 @@ public class SoundPhysics {
 		globalRolloffFactor = Config.rolloffFactor;
 		globalReverbMultiplier = 0.7f * Config.globalReverbGain;
 		soundDistanceAllowance = Config.soundDistanceAllowance;
-		globalVolumeMultiplier = Config.globalVolumeMultiplier;
+		globalVolumeMultiplier0 = Config.globalVolumeMultiplier;
 
 		if (auxFXSlot0 != 0) {
 			// Set the global reverb parameters and apply them to the effect and
@@ -219,7 +219,7 @@ public class SoundPhysics {
 	public static float applyGlobalVolumeMultiplier(final float volume, final float posY) {
 		if (!Config.volumeMulOnlyAffected || !(mc.player == null || mc.world == null || posY <= 0 ||
 			lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC)) {
-			return volume*globalVolumeMultiplier;
+			return volume*globalVolumeMultiplier0;
 		} else {
 			return volume;
 		}
