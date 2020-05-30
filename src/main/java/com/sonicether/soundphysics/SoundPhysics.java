@@ -380,8 +380,11 @@ public class SoundPhysics {
 			offsetY = 0.225;
 		}
 
-		if (category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches() || 
-			(name == "openal" && !mc.world.isAirBlock(new BlockPos(soundX,soundY,soundZ)))) {
+		if ((category == SoundCategory.BLOCKS || blockPattern.matcher(name).matches() ||
+			(name == "openal" && !mc.world.isAirBlock(new BlockPos(soundX,soundY,soundZ)))) &&
+			(MathHelper.floor(playerPos.x) != MathHelper.floor(soundX) ||
+			 MathHelper.floor(playerPos.y) != MathHelper.floor(soundY) ||
+			 MathHelper.floor(playerPos.z) != MathHelper.floor(soundZ))) {
 			// The ray will probably hit the block that it's emitting from
 			// before
 			// escaping. Offset the ray start position towards the player by the
