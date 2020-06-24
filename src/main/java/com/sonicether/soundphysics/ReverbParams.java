@@ -14,6 +14,8 @@ public class ReverbParams {
 	public float lateReverbDelay; // min: 0.0f max: 0.1f
 	public float airAbsorptionGainHF; // min: 0.892f max: 1.0f
 	public float roomRolloffFactor; // min: 0.0f max: 10.0f
+	public float echoTime; // min: 0.075f max: 0.25f
+	public float echoDepth; // min: 0.0f max: 1.0f
 
 	public static ReverbParams getReverb0() {
 		final ReverbParams r = new ReverbParams();
@@ -29,6 +31,8 @@ public class ReverbParams {
 		r.lateReverbDelay = 0.011f;
 		r.airAbsorptionGainHF = 0.994f;
 		r.roomRolloffFactor = 0.16f * Config.rolloffFactor;
+		r.echoTime = 0.090f;
+		r.echoDepth = 0.1f * Config.globalEchoMultiplier;
 
 		return r;
 	}
@@ -47,6 +51,8 @@ public class ReverbParams {
 		r.lateReverbDelay = 0.011f;
 		r.airAbsorptionGainHF = 0.994f;
 		r.roomRolloffFactor = 0.15f * Config.rolloffFactor;
+		r.echoTime = 0.1f;
+		r.echoDepth = 0.15f * Config.globalEchoMultiplier;
 
 		return r;
 	}
@@ -65,6 +71,8 @@ public class ReverbParams {
 		r.lateReverbDelay = 0.021f;
 		r.airAbsorptionGainHF = 0.994f;
 		r.roomRolloffFactor = 0.13f * Config.rolloffFactor;
+		r.echoTime = 0.13f;
+		r.echoDepth = 0.3f * Config.globalEchoMultiplier;
 
 		return r;
 	}
@@ -83,6 +91,8 @@ public class ReverbParams {
 		r.lateReverbDelay = 0.021f;
 		r.airAbsorptionGainHF = 0.994f;
 		r.roomRolloffFactor = 0.11f * Config.rolloffFactor;
+		r.echoTime = 0.20f;
+		r.echoDepth = 0.5f * Config.globalEchoMultiplier;
 
 		return r;
 	}

@@ -739,6 +739,12 @@ public class SoundPhysics {
 		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_ROOM_ROLLOFF_FACTOR, r.roomRolloffFactor);
 		checkErrorLog("Error while assigning reverb roomRolloffFactor: " + r.roomRolloffFactor);
 
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_ECHO_TIME, r.echoTime);
+		checkErrorLog("Error while assigning reverb echoTime: " + r.echoTime);
+
+		EFX10.alEffectf(reverbSlot, EFX10.AL_EAXREVERB_ECHO_DEPTH, r.echoDepth);
+		checkErrorLog("Error while assigning reverb echoDepth: " + r.echoDepth);
+
 		// Attach updated effect object
 		EFX10.alAuxiliaryEffectSloti(auxFXSlot, EFX10.AL_EFFECTSLOT_EFFECT, reverbSlot);
 		checkErrorLog("Error while assigning reverb effect slot: " + reverbSlot);

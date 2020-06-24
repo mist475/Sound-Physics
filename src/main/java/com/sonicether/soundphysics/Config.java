@@ -33,6 +33,7 @@ public class Config {
 	public static boolean noteBlockEnable;
 	public static float maxDistance;
 	public static boolean volumeMulOnlyAffected;
+	public static float globalEchoMultiplier;
 
 	// performance
 	public static boolean skipRainOcclusionTracing;
@@ -135,6 +136,8 @@ public class Config {
 				"How far the rays should be traced.");
 		volumeMulOnlyAffected = this.forgeConfig.getBoolean("Volume Multiplier Only On Affected", categoryGeneral, true,
 				"If true, the global volume multiplier will only be applied to affected sounds (so not to the ui sounds for example).");
+		globalEchoMultiplier = this.forgeConfig.getFloat("Global Echo Multiplier", categoryGeneral, 1.0f, 0.0f, 2.0f,
+				"The global volume multiplier of the echos, put to 0 to disable echos all together");
 
 		// performance
 		skipRainOcclusionTracing = this.forgeConfig.getBoolean("Skip Rain Occlusion Tracing", categoryPerformance, true,
