@@ -15,6 +15,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.MovingSound;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
@@ -23,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -86,6 +89,7 @@ public class SoundPhysics {
 
 	private static SoundCategory lastSoundCategory;
 	private static String lastSoundName;
+	private static ISound.AttenuationType lastSoundAtt;
 
 	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
 	// NOT REMOVE!
@@ -188,37 +192,40 @@ public class SoundPhysics {
 		applyConfigChanges();
 	}
 
-	/**
-	 * CALLED BY ASM INJECTED CODE!
-	 */
-	public static void setLastSoundCategory(final SoundCategory sc) {
-		if (Config.noteBlockEnable && sc == SoundCategory.RECORDS && noteBlockPattern.matcher(lastSoundName).matches()) {
-			lastSoundCategory = SoundCategory.BLOCKS;
+	private static SoundCategory getSoundCategory(final SoundCategory sc, final String name) {
+		if (Config.noteBlockEnable && sc == SoundCategory.RECORDS && noteBlockPattern.matcher(name).matches()) {
+			return SoundCategory.BLOCKS;
 		} else {
-			lastSoundCategory = sc;
+			return sc;
 		}
 	}
 
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void setLastSoundName(final String soundName, final String eventName) {
-		lastSoundName = eventName+"|"+soundName.split(":")[1]; // Quick and dirty hack to check the event and sound name
+	public static void setLastSound(final ISound snd, final SoundCategory sc, final ResourceLocation soundRes, final ResourceLocation eventRes) {
+		lastSoundName = eventRes.toString()+"|"+soundRes.getPath(); // Quick and dirty hack to check the event and sound name
+		lastSoundCategory = getSoundCategory(sc,lastSoundName);
+		lastSoundAtt = snd.getAttenuationType();
+		if (snd instanceof MovingSound)               // Hacky fix until i properly do moving sounds (I'm currently thinking about how)
+			lastSoundCategory = SoundCategory.MASTER; // because all (at least vanilla) moving sounds don't init their position when played
 	}
 
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void setLastSoundName(final String soundName) {
+	public static void setLastSound(final SoundCategory sc, final String soundName) {
+		lastSoundCategory = sc;
 		lastSoundName = soundName;
+		lastSoundAtt = ISound.AttenuationType.LINEAR;
 	}
 
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static float applyGlobalVolumeMultiplier(final float volume, final float posY) {
-		if (!Config.volumeMulOnlyAffected || !(mc.player == null || mc.world == null || posY <= 0 ||
-			lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC)) {
+	public static float applyGlobalVolumeMultiplier(final float volume) {
+		if (!Config.volumeMulOnlyAffected || !(mc.player == null || mc.world == null || lastSoundCategory == SoundCategory.MASTER ||
+			lastSoundAtt == ISound.AttenuationType.NONE || lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC)) {
 			return volume*globalVolumeMultiplier0;
 		} else {
 			return volume;
@@ -230,7 +237,7 @@ public class SoundPhysics {
 	 */
 	// For sounds that get played normally
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
-		onPlaySound(posX, posY, posZ, sourceID, lastSoundCategory, lastSoundName);
+		onPlaySound(posX, posY, posZ, sourceID, lastSoundCategory, lastSoundName, lastSoundAtt);
 	}
 
 	/**
@@ -238,15 +245,15 @@ public class SoundPhysics {
 	 */
 	// For sounds that get played using OpenAL directly or just not using the minecraft sound system
 	public static void onPlaySoundAL(final float posX, final float posY, final float posZ, final int sourceID) {
-		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.MASTER, "openal");
+		onPlaySound(posX, posY, posZ, sourceID, SoundCategory.AMBIENT, "openal", ISound.AttenuationType.LINEAR);
 	}
 
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
-	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
-		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
-		evaluateEnvironment(sourceID, posX, posY, posZ, soundCat, soundName);
+	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName, ISound.AttenuationType attType) {
+		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+attType.toString()+" - "+soundName);
+		evaluateEnvironment(sourceID, posX, posY, posZ, soundCat, soundName, attType);
 	}
 
 	/**
@@ -408,11 +415,14 @@ public class SoundPhysics {
 	}
 
 	@SuppressWarnings("deprecation")
-	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ, final SoundCategory category, final String name) {
+	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ, final SoundCategory category,
+											final String name, ISound.AttenuationType attType) {
 		try {
-			if (mc.player == null || mc.world == null || posY <= 0 || category == SoundCategory.RECORDS || category == SoundCategory.MUSIC) {
+			if (mc.player == null || mc.world == null || category == SoundCategory.MASTER || attType == ISound.AttenuationType.NONE ||
+				 category == SoundCategory.RECORDS || category == SoundCategory.MUSIC) {
 				// posY <= 0 as a condition has to be there: Ingame
 				// menu clicks do have a player and world present
+				// The Y position check has been removed due to problems with Cubic Chunks
 				setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 				return;
 			}

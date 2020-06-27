@@ -37,13 +37,13 @@ public class CoreModInjector implements IClassTransformer {
 
 	public static final Logger logger = LogManager.getLogger(SoundPhysics.modid+"injector");
 
-	public static boolean shouldPatchDS() {
+	private static boolean shouldPatchDS(boolean checkNew) {
 		if (Loader.isModLoaded("dsurround")) {
 			Map<String,ModContainer> mods = Loader.instance().getIndexedModList();
 			String version[] = mods.get("dsurround").getVersion().split("\\.");
 			if (version.length < 2) {
 				logError("What the hell, DS's version is not properly formatted ?");
-			} else if (version[1].equals("5")) {
+			} else if ((!checkNew && version[1].equals("5")) || (checkNew && version[1].equals("6"))) {
 				return true;
 			}
 		}
@@ -67,32 +67,21 @@ public class CoreModInjector implements IClassTransformer {
 		if (obfuscated.equals("chm")) {
 			// Inside SoundManager
 			InsnList toInject = new InsnList();
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 7));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSoundCategory", "(Lqg;)V", false));
-
-			// Target method: playSound
-			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
-					AbstractInsnNode.METHOD_INSN, "setPitch", null, -1, toInject, false, 0, 0, false, 0, -1);
-
-			toInject = new InsnList();
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 4));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "cgq", "a", "()Lnf;", false));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 3));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "nf", "toString", "()Ljava/lang/String;", false));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSoundName", "(Ljava/lang/String;Ljava/lang/String;)V", false));
+					"setLastSound", "(Lcgt;Lqg;Lnf;Lnf;)V", false));
 
 			// Target method: playSound
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
 					AbstractInsnNode.METHOD_INSN, "setPitch", null, -1, toInject, false, 0, 0, false, 0, -1);
 
 			toInject = new InsnList();
-			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
-			toInject.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "cgt", "j", "()F", true));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"applyGlobalVolumeMultiplier", "(FF)F", false));
+					"applyGlobalVolumeMultiplier", "(F)F", false));
 
 			// Target method: playSound, target invocation setVolume
 			bytes = patchMethodInClass(obfuscated, bytes, "c", "(Lcgt;)V", Opcodes.INVOKEVIRTUAL,
@@ -332,14 +321,12 @@ public class CoreModInjector implements IClassTransformer {
 			final String classRes = newIR ? "cam72cam/mod/resource/Identifier" : "nf";
 
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "qg","i", "Lqg;")); // Ambient sound category
-			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSoundCategory", "(Lqg;)V", false));
 			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
 			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, classCS, "oggLocation",
 					"L"+classRes+";"));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, classRes, "toString", "()Ljava/lang/String;", false));
 			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
-					"setLastSoundName", "(Ljava/lang/String;)V", false));
+					"setLastSound", "(Lqg;Ljava/lang/String;)V", false));
 
 			// Target method: play
 			bytes = patchMethodInClass(obfuscated, bytes, "play", playDesc, Opcodes.INVOKEVIRTUAL,
@@ -382,7 +369,7 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.METHOD_INSN, "<init>", "(ILjava/lang/String;FFF)V", -1, toInject, true, 0, 0, false, -5, -1);*/
 		} else
 
-		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.SoundEffect") && Config.dsPatching && shouldPatchDS()) {
+		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.SoundEffect") && Config.dsPatching && shouldPatchDS(false)) {
 			// Inside SoundEffect
 			InsnList toInject = new InsnList();
 
@@ -394,16 +381,15 @@ public class CoreModInjector implements IClassTransformer {
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, -1);
 		} else
 
-		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.ConfigSoundInstance") && Config.dsPatching && shouldPatchDS()) {
+		if (obfuscated.equals("org.orecruncher.dsurround.client.sound.ConfigSoundInstance") && Config.dsPatching && shouldPatchDS(true)) {
 			// Inside ConfigSoundInstance
 			InsnList toInject = new InsnList();
 
-			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "org/orecruncher/dsurround/client/sound/SoundInstance",
-					"noAttenuation", "()Lcgt$a;", false));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "cgt$a","a", "Lcgt$a;")); // ISound.AttenuationType.NONE
 
 			// Target method: constructor
-			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Ljava/lang/String;F)V", Opcodes.GETSTATIC,
-					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, true, 0, 1);
+			bytes = patchMethodInClass(obfuscated, bytes, "<init>", "(Ljava/lang/String;F)V", Opcodes.INVOKESTATIC,
+					AbstractInsnNode.METHOD_INSN, "noAttenuation", null, -1, toInject, false, 0, 0, true, 0, -1);
 		} else
 
 		if (obfuscated.equals("com.mushroom.midnight.client.SoundReverbHandler") && Config.midnightPatching) {
