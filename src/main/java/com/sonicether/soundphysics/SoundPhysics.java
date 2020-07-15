@@ -672,6 +672,17 @@ public class SoundPhysics {
 				sendCutoff3 *= 0.4f;
 			}
 
+			if (Config.midnightPatching && Config.midnightPatchingFix && mc.world.provider.getDimensionType().getName() == "midnight") {
+				// Since the patch removes the incompatble reverb, readd some reverb everywhere
+				// It's not a great fix but it works fine
+				sendGain1 = MathHelper.clamp(sendGain1, 0.3f, 1.0f);
+				sendGain2 = MathHelper.clamp(sendGain2, 0.5f, 1.0f);
+				sendGain3 = MathHelper.clamp(sendGain3, 0.7f, 1.0f);
+				sendCutoff1 = MathHelper.clamp(sendCutoff1, 0.3f, 1.0f);
+				sendCutoff2 = MathHelper.clamp(sendCutoff2, 0.5f, 1.0f);
+				sendCutoff3 = MathHelper.clamp(sendCutoff3, 0.7f, 1.0f);
+			}
+
 			setEnvironment(sourceID, sendGain0, sendGain1, sendGain2, sendGain3, sendCutoff0, sendCutoff1, sendCutoff2,
 					sendCutoff3, directCutoff, directGain, airAbsorptionFactor);
 		} catch(Exception e) {
