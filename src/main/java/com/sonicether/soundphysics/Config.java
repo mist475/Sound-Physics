@@ -57,6 +57,7 @@ public class Config {
 	public static boolean dsPatching;
 	public static boolean midnightPatching;
 	public static boolean midnightPatchingFix;
+	public static boolean ic2Patching;
 	public static boolean autoSteroDownmix;
 	
 	// misc
@@ -181,6 +182,8 @@ public class Config {
 				"REQUIRES RESTART. If true, patches The Midnight to disable redundant functionality that causes some problems.");
 		midnightPatchingFix = this.forgeConfig.getBoolean("Readd The Midnight Reverb", categoryCompatibility, true,
 				"If true, readds The Midnight reverb that is removed with the patch.");
+		ic2Patching = this.forgeConfig.getBoolean("Patch IC2", categoryCompatibility, true,
+				"REQUIRES RESTART. If true, patches IC2 audio to better work with Sound Physics.");
 		autoSteroDownmix = this.forgeConfig.getBoolean("Auto Stereo Downmix", categoryCompatibility, true,
 				"REQUIRES RESTART. If true, Automatically downmix stereo sounds that are loaded to mono");
 

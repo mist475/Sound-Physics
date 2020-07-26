@@ -223,6 +223,28 @@ public class SoundPhysics {
 	/**
 	 * CALLED BY ASM INJECTED CODE!
 	 */
+	// For IC2
+	public static void setLastSound(final int position, final String soundName) {
+		lastSoundCategory = position == 0 ? SoundCategory.BLOCKS : SoundCategory.PLAYERS;
+		lastSoundName = "ic2:"+soundName;
+		lastSoundAtt = ISound.AttenuationType.LINEAR;
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
+	public static int ic2DistanceCheckHook(float i, float dst, float x1, float y1, float z1, float x2, float y2, float z2) {
+		if (i >= dst ||
+			(MathHelper.floor(x1) == MathHelper.floor(x2) &&
+			MathHelper.floor(y1) == MathHelper.floor(y2) &&
+			MathHelper.floor(z1) == MathHelper.floor(z2))) return 1;
+		if (dst == i) return 0;
+		return -1;
+	}
+
+	/**
+	 * CALLED BY ASM INJECTED CODE!
+	 */
 	public static float applyGlobalVolumeMultiplier(final float volume) {
 		if (!Config.volumeMulOnlyAffected || !(mc.player == null || mc.world == null || lastSoundCategory == SoundCategory.MASTER ||
 			lastSoundAtt == ISound.AttenuationType.NONE || lastSoundCategory == SoundCategory.RECORDS || lastSoundCategory == SoundCategory.MUSIC)) {

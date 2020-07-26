@@ -166,6 +166,19 @@ public class CoreModInjector implements IClassTransformer {
 			bytes = patchMethodInClass(obfuscated, bytes, "newSource",
 					"(ZLjava/lang/String;Ljava/net/URL;Ljava/lang/String;ZFFFIF)V", Opcodes.INVOKESPECIAL,
 					AbstractInsnNode.METHOD_INSN, "<init>", null, -1, toInject, true, 2, 0, false, 0, -1);
+
+			// Can't reuse the list for some reason
+			toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"attenuationModel", "I"));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"globalRolloffFactor", "F"));
+
+			// Target method: newSource
+			bytes = patchMethodInClass(obfuscated, bytes, "newSource",
+					"(ZLjava/lang/String;Ljava/lang/String;ZFFFIF)V", Opcodes.INVOKESPECIAL,
+					AbstractInsnNode.METHOD_INSN, "<init>", null, -1, toInject, true, 2, 0, false, 0, -1);
 		} else
 
 		if (obfuscated.equals("pl")) {
@@ -344,6 +357,7 @@ public class CoreModInjector implements IClassTransformer {
 
 			toInject = new InsnList();
 
+			// TODO: use applyGlobalVolumeMultiplier here
 			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
 					"globalVolumeMultiplier0", "F"));
 			toInject.add(new InsnNode(Opcodes.FMUL));
@@ -402,6 +416,118 @@ public class CoreModInjector implements IClassTransformer {
 			// Target method: onPlaySound
 			bytes = patchMethodInClass(obfuscated, bytes, "onPlaySound", "(I)V", Opcodes.GETSTATIC,
 					AbstractInsnNode.FIELD_INSN, "", null, -1, toInject, true, 0, 0, false, 0, 0);
+		} else
+
+		if (obfuscated.equals("ic2.core.audio.AudioManagerClient") && Config.ic2Patching) {
+			// Inside AudioManagerClient
+			InsnList toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"attenuationModel", "I"));
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"globalRolloffFactor", "F"));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 2));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "ic2/core/audio/PositionSpec", "ordinal", "()I", false));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 3));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"setLastSound", "(ILjava/lang/String;)V", false));
+
+			// Target method: playOnce
+			bytes = patchMethodInClass(obfuscated, bytes, "playOnce", "(Ljava/lang/Object;Lic2/core/audio/PositionSpec;Ljava/lang/String;ZF)Ljava/lang/String;", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "quickPlay", null, -1, toInject, true, 7, 0, false, 0, -1);
+
+			toInject = new InsnList();
+
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"applyGlobalVolumeMultiplier", "(F)F", false));
+
+			// Target method: playOnce
+			bytes = patchMethodInClass(obfuscated, bytes, "playOnce", "(Ljava/lang/Object;Lic2/core/audio/PositionSpec;Ljava/lang/String;ZF)Ljava/lang/String;", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "setVolume", null, -1, toInject, true, 0, 0, false, 0, -1);
+		} else
+
+		if (obfuscated.equals("ic2.core.audio.AudioSourceClient") && Config.ic2Patching) {
+			// Inside AudioSourceClient
+			InsnList toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioSourceClient", "positionSpec",
+					"Lic2/core/audio/PositionSpec;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "ic2/core/audio/PositionSpec", "ordinal", "()I", false));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioSourceClient", "initialSoundFile",
+					"Ljava/lang/String;"));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"setLastSound", "(ILjava/lang/String;)V", false));
+
+			// Target method: play
+			bytes = patchMethodInClass(obfuscated, bytes, "play", "()V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "play", null, -1, toInject, true, 0, 0, false, 0, -1);
+
+			toInject = new InsnList();
+
+			toInject.add(new InsnNode(Opcodes.FCONST_1));
+
+			// Target method: updateVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "updateVolume", "(Lnet/minecraft/entity/player/EntityPlayer;)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "getMasterVolume", null, -1, toInject, false, 0, 0, true, -5, 0);
+
+			toInject = new InsnList();
+
+			/*toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"globalVolumeMultiplier0", "F"));*/
+			toInject.add(new InsnNode(Opcodes.FCONST_1));
+
+			// Target method: updateVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "updateVolume", "(Lnet/minecraft/entity/player/EntityPlayer;)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "getMasterVolume", null, -1, toInject, false, 1, 0, true, 0, 1);
+
+			toInject = new InsnList();
+
+			toInject.add(new FieldInsnNode(Opcodes.GETSTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"soundDistanceAllowance", "D"));
+			toInject.add(new InsnNode(Opcodes.D2F));
+			toInject.add(new InsnNode(Opcodes.FMUL));
+
+			// Target method: updateVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "updateVolume", "(Lnet/minecraft/entity/player/EntityPlayer;)V", Opcodes.INVOKESTATIC,
+					AbstractInsnNode.METHOD_INSN, "max", null, -1, toInject, false, 0, 0, false, 1, -1);
+
+			toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 1));
+			toInject.add(new InsnNode(Opcodes.ACONST_NULL));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"calculateEntitySoundOffset", "(Lvg;Lqe;)D", false));
+			toInject.add(new InsnNode(Opcodes.DADD));
+
+			// Target method: updateVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "updateVolume", "(Lnet/minecraft/entity/player/EntityPlayer;)V", Opcodes.INVOKEVIRTUAL,
+					AbstractInsnNode.METHOD_INSN, "getWorld", null, -1, toInject, true, 0, 0, false, -15, -1); // -11 without labels
+
+			toInject = new InsnList();
+
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioSourceClient", "position",
+					"Lic2/core/audio/AudioPosition;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioPosition", "x", "F"));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioSourceClient", "position",
+					"Lic2/core/audio/AudioPosition;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioPosition", "y", "F"));
+			toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioSourceClient", "position",
+					"Lic2/core/audio/AudioPosition;"));
+			toInject.add(new FieldInsnNode(Opcodes.GETFIELD, "ic2/core/audio/AudioPosition", "z", "F"));
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 6));
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 7));
+			toInject.add(new VarInsnNode(Opcodes.FLOAD, 8));
+			toInject.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "com/sonicether/soundphysics/SoundPhysics",
+					"ic2DistanceCheckHook", "(FFFFFFFF)I", false));
+
+			// Target method: updateVolume
+			bytes = patchMethodInClass(obfuscated, bytes, "updateVolume", "(Lnet/minecraft/entity/player/EntityPlayer;)V", Opcodes.FCMPG,
+					AbstractInsnNode.INSN, null, null, -1, toInject, false, 0, 0, true, 0, -1);
 		}
 
 		//log("Finished processing class: '"+obfuscated+"' ('"+deobfuscated+"')");
