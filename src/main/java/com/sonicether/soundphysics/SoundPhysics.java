@@ -1,6 +1,7 @@
 package com.sonicether.soundphysics;
 
 import java.util.regex.Pattern;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -436,6 +437,15 @@ public class SoundPhysics {
 		return new Vec3d(soundX + offsetX, soundY + offsetY, soundZ + offsetZ);
 	}
 
+	private static float getPlayerEyeHeight() throws IllegalStateException {
+		ReentrantReadWriteLock lock = (ReentrantReadWriteLock)mc.player.getDataManager().lock;
+		if (lock.isWriteLocked()) {
+			logError("Deadlock detected, avoiding it by throwing exception");
+			throw new IllegalStateException("Player's Data Mananger is write locked");
+		}
+		return mc.player.getEyeHeight();
+	}
+
 	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ, final SoundCategory category,
 											final String name, ISound.AttenuationType attType) {
@@ -459,7 +469,7 @@ public class SoundPhysics {
 			float directCutoff = 1.0f;
 			final float absorptionCoeff = Config.globalBlockAbsorption * 3.0f;
 
-			final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + mc.player.getEyeHeight(), mc.player.posZ);
+			final Vec3d playerPos = new Vec3d(mc.player.posX, mc.player.posY + getPlayerEyeHeight(), mc.player.posZ);
 			final Vec3d soundPos = offsetSoundByName(posX, posY, posZ, playerPos, name, category);
 			final Vec3d normalToPlayer = playerPos.subtract(soundPos).normalize();
 
@@ -708,8 +718,7 @@ public class SoundPhysics {
 			setEnvironment(sourceID, sendGain0, sendGain1, sendGain2, sendGain3, sendCutoff0, sendCutoff1, sendCutoff2,
 					sendCutoff3, directCutoff, directGain, airAbsorptionFactor);
 		} catch(Exception e) {
-			logError("Error while evaluation environment:");
-			e.printStackTrace();
+			logger.error("Error while evaluation environment:", e);
 			setEnvironment(sourceID, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
