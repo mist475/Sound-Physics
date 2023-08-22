@@ -45,11 +45,11 @@ import java.util.TimerTask;
 import org.objectweb.asm.Type;
 
 @Mod(modid = SoundPhysics.modid, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
-	dependencies="before:computronics") // Dependencies to make sure that SP's config is loaded before patching Computronics
+	dependencies="before:computronics;required-after:gtnhmixins@[2.0.0,)") // Dependencies to make sure that SP's config is loaded before patching Computronics
 public class SoundPhysics {
 
 	public static final String modid = "soundphysics";
-	public static final String version = "1.0.6";
+	public static final String version = "1.1.0";
 	public static final String mcVersion = "1.7.10";
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
@@ -93,9 +93,6 @@ public class SoundPhysics {
 	private static volatile boolean thread_alive;
 	private static volatile boolean thread_signal_death;
 	private static volatile List<Source> source_list;
-
-	// THESE VARIABLES ARE CONSTANTLY ACCESSED AND USED BY ASM INJECTED CODE! DO
-	// NOT REMOVE!
 	public static int attenuationModel = SoundSystemConfig.ATTENUATION_ROLLOFF;
 	public static float globalRolloffFactor = Config.rolloffFactor;
 	public static float globalVolumeMultiplier = 4.0f;
@@ -103,7 +100,7 @@ public class SoundPhysics {
 	public static double soundDistanceAllowance = Config.soundDistanceAllowance;
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	public static void init() {
 		setupEFX();
@@ -324,21 +321,21 @@ public class SoundPhysics {
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	public static void setLastSoundCategory(final SoundCategory sc) {
 		lastSoundCategory = sc;
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	public static void setLastSoundName(final String soundName) {
 		lastSoundName = soundName;
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	// For sounds that get played normally
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID) {
@@ -346,7 +343,7 @@ public class SoundPhysics {
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	// For sounds that get played using OpenAL directly or just not using the minecraft sound system
 	public static void onPlaySoundAL(final float posX, final float posY, final float posZ, final int sourceID) {
@@ -354,7 +351,7 @@ public class SoundPhysics {
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	public static void onPlaySound(final float posX, final float posY, final float posZ, final int sourceID, SoundCategory soundCat, String soundName) {
 		//log(String.valueOf(posX)+" "+String.valueOf(posY)+" "+String.valueOf(posZ)+" - "+String.valueOf(sourceID)+" - "+soundCat.toString()+" - "+soundName);
@@ -369,7 +366,7 @@ public class SoundPhysics {
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	public static SoundBuffer onLoadSound(SoundBuffer buff, String filename) {
 		if (buff == null || buff.audioFormat.getChannels() == 1 || !Config.autoSteroDownmix) return buff;
@@ -402,7 +399,7 @@ public class SoundPhysics {
 	}
 
 	/**
-	 * CALLED BY ASM INJECTED CODE!
+	 * CALLED BY Mixin INJECTED CODE!
 	 */
 	public static double calculateEntitySoundOffset(final Entity entity, final String name) {
 		if (name != null) {
