@@ -75,6 +75,11 @@ public class Config {
 		syncConfig();
 	}
 
+	public void setConfig(Configuration config) {
+		this.forgeConfig = config;
+		syncConfig();
+	}
+
 	public void init(final FMLInitializationEvent event) {
 		MinecraftForge.EVENT_BUS.register(this);
 	}
@@ -86,8 +91,9 @@ public class Config {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	public List<IConfigElement> getConfigElements() {
-		final ArrayList<IConfigElement> list = new ArrayList<IConfigElement>();
+		final ArrayList<IConfigElement> list = new ArrayList<>();
 
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryGeneral)));
 		list.add(new ConfigElement(this.forgeConfig.getCategory(Config.categoryPerformance)));

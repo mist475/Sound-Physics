@@ -3,7 +3,9 @@ package com.sonicether.soundphysics;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.common.config.Configuration;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,9 @@ public class CoreModLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
 	@Override
 	public void injectData(final Map<String, Object> data) {
+		final File configFile = new File((File) data.get("mcLocation"), "/config/soundphysics.cfg");
+		final Configuration config = new Configuration(configFile);
+		Config.instance.setConfig(config);
 	}
 
 	@Override
@@ -51,7 +56,7 @@ public class CoreModLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
 			mixins.add("MixinSoundManagerStarterThread");
 			mixins.add("MixinSoundManager");
 			mixins.add("MixinSourceLWJGLOpenAL");
-			//TODO: respect Config.AutoDownMix option
+			//Config not loaded at this time
 			mixins.add("MixinLibraryLWJGLOpenAL");
 			mixins.add("MixinSoundSystem");
 			mixins.add("MixinWorld");
