@@ -1,55 +1,44 @@
 package com.sonicether.soundphysics;
 
-import java.util.regex.Pattern;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.ListIterator;
-import java.util.Collections;
-import java.nio.FloatBuffer;
-
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SoundCategory;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.ALCcontext;
 import org.lwjgl.openal.ALCdevice;
 import org.lwjgl.openal.EFX10;
-import org.lwjgl.BufferUtils;
-
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.client.audio.SoundCategory;
-import net.minecraftforge.client.event.sound.SoundEvent;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
-import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.SoundHandler;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.Text;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import paulscode.sound.SoundSystemConfig;
 import paulscode.sound.SoundBuffer;
+import paulscode.sound.SoundSystemConfig;
+
 import javax.sound.sampled.AudioFormat;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Timer;  
-import java.util.TimerTask;
+import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.regex.Pattern;
 
-import org.objectweb.asm.Type;
-
-@Mod(modid = SoundPhysics.modid, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
+@Mod(modid = SoundPhysics.modid, name = SoundPhysics.modName, acceptedMinecraftVersions = SoundPhysics.mcVersion, version = SoundPhysics.version, guiFactory = "com.sonicether.soundphysics.SPGuiFactory",
 	dependencies="before:computronics;required-after:gtnhmixins@[2.0.0,)") // Dependencies to make sure that SP's config is loaded before patching Computronics
 public class SoundPhysics {
 
-	public static final String modid = "soundphysics";
-	public static final String version = "1.1.0";
+	public static final String modid = "@MODID@";
+	public static final String modName = "@MODNAME@";
+	public static final String version = "@VERSION@";
 	public static final String mcVersion = "1.7.10";
 
 	private static final Pattern rainPattern = Pattern.compile(".*rain.*");
@@ -180,11 +169,9 @@ public class SoundPhysics {
 
 	public static boolean source_check(Source s) {
 		synchronized (source_list) {
-			ListIterator<Source> iter = source_list.listIterator();
-			while (iter.hasNext()) {
-				Source sn = iter.next();
+			for (Source sn : source_list) {
 				if (sn.sourceID == s.sourceID && sn.bufferID == s.bufferID &&
-					sn.posX == s.posX && sn.posY == s.posY && sn.posZ == s.posZ) {
+						sn.posX == s.posX && sn.posY == s.posY && sn.posZ == s.posZ) {
 					return true;
 				}
 			}
@@ -227,7 +214,7 @@ public class SoundPhysics {
 	}*/
 
 	private static synchronized void setupThread() {
-		if (source_list == null) source_list = Collections.synchronizedList(new ArrayList<Source>());
+		if (source_list == null) source_list = Collections.synchronizedList(new ArrayList<>());
 		else source_list.clear();
 
 		/*if (proc_thread != null) {
@@ -380,7 +367,7 @@ public class SoundPhysics {
 		boolean bigendian = orignalformat.isBigEndian();
 		AudioFormat monoformat = new AudioFormat(orignalformat.getEncoding(), orignalformat.getSampleRate(), bits,
 												1, orignalformat.getFrameSize(), orignalformat.getFrameRate(), bigendian);
-		if (Config.autoSteroDownmixLogging) log("Converting sound '"+filename+"'("+orignalformat.toString()+") to mono ("+monoformat.toString()+")");
+		if (Config.autoSteroDownmixLogging) log("Converting sound '"+filename+"'("+ orignalformat +") to mono ("+ monoformat +")");
 
 		ByteBuffer bb = ByteBuffer.wrap(buff.audioData,0,buff.audioData.length);
 		bb.order(bigendian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN);
@@ -442,7 +429,6 @@ public class SoundPhysics {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private static float getBlockReflectivity(final Block block) {
 		final Block.SoundType soundType = block.stepSound;
 		final Material blockMaterial = block.getMaterial();
@@ -512,9 +498,9 @@ public class SoundPhysics {
 		double offsetZ = 0.0;
 		double offsetTowardsPlayer = 0.0;
 
-		double tempNormX = 0;
-		double tempNormY = 0;
-		double tempNormZ = 0;
+		double tempNormX;
+		double tempNormY;
+		double tempNormZ;
 
 		if (soundY % 1.0 < 0.001 || stepPattern.matcher(name).matches()) {
 			offsetY = 0.13;
@@ -544,7 +530,6 @@ public class SoundPhysics {
 		return Vec3.createVectorHelper(soundX + offsetX, soundY + offsetY, soundZ + offsetZ);
 	}
 
-	@SuppressWarnings("deprecation")
 	private static void evaluateEnvironment(final int sourceID, final float posX, final float posY, final float posZ, final SoundCategory category, final String name) {
 		try {
 			if (mc.thePlayer == null | mc.theWorld == null | posY <= 0 | category == SoundCategory.RECORDS
@@ -670,9 +655,8 @@ public class SoundPhysics {
 			final float rcpPrimaryRays = 1.0f / numRays;
 
 			for (int i = 0; i < numRays; i++) {
-				final float fi = i;
-				final float fiN = fi / numRays;
-				final float longitude = gAngle * fi;
+				final float fiN = (float) i / numRays;
+				final float longitude = gAngle * (float) i;
 				final float latitude = (float) Math.asin(fiN * 2.0f - 1.0f);
 
 				final Vec3 rayDir = Vec3.createVectorHelper(Math.cos(latitude) * Math.cos(longitude),
@@ -728,8 +712,7 @@ public class SoundPhysics {
 							// Cast one final ray towards the player. If it's
 							// unobstructed, then the sound source and the player
 							// share airspace.
-							if (Config.simplerSharedAirspaceSimulation && j == rayBounces - 1
-									|| !Config.simplerSharedAirspaceSimulation) {
+							if (!Config.simplerSharedAirspaceSimulation || j == rayBounces - 1) {
 								final Vec3 finalRayStart = Vec3.createVectorHelper(lastHitPos.xCoord + lastHitNormal.xCoord * 0.01,
 										lastHitPos.yCoord + lastHitNormal.yCoord * 0.01, lastHitPos.zCoord + lastHitNormal.zCoord * 0.01);
 
@@ -915,28 +898,14 @@ public class SoundPhysics {
 			return false;
 		}
 
-		String errorName;
-
-		switch (error) {
-		case AL10.AL_INVALID_NAME:
-			errorName = "AL_INVALID_NAME";
-			break;
-		case AL10.AL_INVALID_ENUM:
-			errorName = "AL_INVALID_ENUM";
-			break;
-		case AL10.AL_INVALID_VALUE:
-			errorName = "AL_INVALID_VALUE";
-			break;
-		case AL10.AL_INVALID_OPERATION:
-			errorName = "AL_INVALID_OPERATION";
-			break;
-		case AL10.AL_OUT_OF_MEMORY:
-			errorName = "AL_OUT_OF_MEMORY";
-			break;
-		default:
-			errorName = Integer.toString(error);
-			break;
-		}
+		String errorName = switch (error) {
+			case AL10.AL_INVALID_NAME -> "AL_INVALID_NAME";
+			case AL10.AL_INVALID_ENUM -> "AL_INVALID_ENUM";
+			case AL10.AL_INVALID_VALUE -> "AL_INVALID_VALUE";
+			case AL10.AL_INVALID_OPERATION -> "AL_INVALID_OPERATION";
+			case AL10.AL_OUT_OF_MEMORY -> "AL_OUT_OF_MEMORY";
+			default -> Integer.toString(error);
+		};
 
 		logError(errorMessage + " OpenAL error " + errorName);
 		return true;

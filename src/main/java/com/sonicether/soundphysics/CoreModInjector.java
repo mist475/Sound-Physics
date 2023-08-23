@@ -1,8 +1,6 @@
 package com.sonicether.soundphysics;
 
-import java.util.Iterator;
-import java.util.ListIterator;
-
+import net.minecraft.launchwrapper.IClassTransformer;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
@@ -15,7 +13,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import net.minecraft.launchwrapper.IClassTransformer;
+import java.util.ListIterator;
 
 public class CoreModInjector implements IClassTransformer {
 
@@ -23,7 +21,7 @@ public class CoreModInjector implements IClassTransformer {
 
 	@Override
 	public byte[] transform(final String obfuscated, final String deobfuscated, byte[] bytes) {
-		//Description should be clear enough though
+		//TODO:figure out why this doesn't work
 		if (obfuscated.equals("oi")) {
 			// Inside ServerConfigurationManager
 			InsnList toInject = new InsnList();
@@ -120,10 +118,8 @@ public class CoreModInjector implements IClassTransformer {
 		final ClassNode classNode = new ClassNode();
 		final ClassReader classReader = new ClassReader(bytes);
 		classReader.accept(classNode, 0);
-		final Iterator<MethodNode> methodIterator = classNode.methods.iterator();
-		
-		while (methodIterator.hasNext()) {
-			final MethodNode m = methodIterator.next();
+
+		for (MethodNode m : classNode.methods) {
 			//log("@" + m.name + " " + m.desc);
 
 			if (m.name.equals(targetMethod) && m.desc.equals(targetMethodSignature)) {

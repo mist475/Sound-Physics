@@ -1,11 +1,11 @@
 [
 {
-  "modid": "soundphysics",
-  "name": "Sound Physics",
+  "modid": "$modId",
+  "name": "$modName",
   "description": "Provides realistic sound attenuation, reverberation, and absorption through blocks.",
-  "mcversion": "1.7.10",
-  "version": "1.1.0",
-  "url": "https://github.com/djpadbit/Sound-Physics",
+  "mcversion": "$minecraftVersion",
+  "version": "$modVersion",
+  "url": "https://github.com/mist475/Sound-Physics",
   "authorList": ["Sonic Ether","daipenger","djpadbit","Mist475"]
 }
 ]
