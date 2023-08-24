@@ -3,6 +3,7 @@ package com.sonicether.soundphysics;
 import com.gtnewhorizon.gtnhmixins.IEarlyMixinLoader;
 import cpw.mods.fml.relauncher.FMLLaunchHandler;
 import cpw.mods.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraft.launchwrapper.Launch;
 import net.minecraftforge.common.config.Configuration;
 
 import java.io.File;
@@ -33,9 +34,6 @@ public class CoreModLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
 	@Override
 	public void injectData(final Map<String, Object> data) {
-		final File configFile = new File((File) data.get("mcLocation"), "/config/soundphysics.cfg");
-		final Configuration config = new Configuration(configFile);
-		Config.instance.setConfig(config);
 	}
 
 	@Override
@@ -50,14 +48,18 @@ public class CoreModLoader implements IFMLLoadingPlugin, IEarlyMixinLoader {
 
 	@Override
 	public List<String> getMixins(Set<String> loadedCoreMods) {
+		final Configuration config = new Configuration(new File(Launch.minecraftHome, "config" + File.separator + "soundphysics.cfg"));
+		Config.instance.setConfig(config);
+
 		boolean client = FMLLaunchHandler.side().isClient();
 		List<String> mixins = new ArrayList<>();
 		if (client) {
 			mixins.add("MixinSoundManagerStarterThread");
 			mixins.add("MixinSoundManager");
 			mixins.add("MixinSourceLWJGLOpenAL");
-			//Config not loaded at this time
-			mixins.add("MixinLibraryLWJGLOpenAL");
+			if (Config.autoSteroDownmix) {
+				mixins.add("MixinLibraryLWJGLOpenAL");
+			}
 			mixins.add("MixinSoundSystem");
 			mixins.add("MixinWorld");
 		}
