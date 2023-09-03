@@ -1,8 +1,10 @@
 package com.sonicether.soundphysics;
 
+import cpw.mods.fml.client.event.ConfigChangedEvent;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
@@ -12,6 +14,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.openal.AL11;
@@ -50,12 +53,22 @@ public class SoundPhysics {
 
 	@Mod.EventHandler
 	public void preInit(final FMLPreInitializationEvent event) {
-		Config.instance.preInit(event);
+		Config.instance.syncConfig();
+		applyConfigChanges();
 	}
 
 	@Mod.EventHandler
 	public void init(final FMLInitializationEvent event) {
-		Config.instance.init(event);
+		MinecraftForge.EVENT_BUS.register(this);
+	}
+
+	@SubscribeEvent
+	public void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
+		if (eventArgs.modID.equals(SoundPhysics.modid)) {
+			if(Config.instance.syncConfig()) {
+				applyConfigChanges();
+			}
+		}
 	}
 
 	private static final String logPrefix = "[SOUND PHYSICS]";

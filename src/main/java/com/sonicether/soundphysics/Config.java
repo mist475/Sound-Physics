@@ -3,18 +3,13 @@ package com.sonicether.soundphysics;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 import cpw.mods.fml.client.config.IConfigElement;
-import cpw.mods.fml.client.event.ConfigChangedEvent;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class Config {
 
-	public static final Config instance;
+	public static final Config instance = new Config();
 	private Configuration forgeConfig;
 
 	// general
@@ -63,32 +58,12 @@ public class Config {
 	private static final String categoryCompatibility = "Compatibility";
 	private static final String categoryMisc = "Misc";
 
-	static {
-		instance = new Config();
-	}
-
 	private Config() {
-	}
-
-	public void preInit(final FMLPreInitializationEvent event) {
-		this.forgeConfig = new Configuration(event.getSuggestedConfigurationFile());
-		syncConfig();
 	}
 
 	public void setConfig(Configuration config) {
 		this.forgeConfig = config;
 		syncConfig();
-	}
-
-	public void init(final FMLInitializationEvent event) {
-		MinecraftForge.EVENT_BUS.register(this);
-	}
-
-	@SubscribeEvent
-	public void onConfigChanged(final ConfigChangedEvent.OnConfigChangedEvent eventArgs) {
-		if (eventArgs.modID.equals(SoundPhysics.modid)) {
-			syncConfig();
-		}
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -104,7 +79,10 @@ public class Config {
 		return list;
 	}
 
-	private void syncConfig() {
+	/**
+	 * @return If the configuration has changed.
+	 */
+	public boolean syncConfig() {
 		// General
 		rolloffFactor = this.forgeConfig.getFloat("Attenuation Factor", categoryGeneral, 1.0f, 0.2f, 1.0f,
 				"Affects how quiet a sound gets based on distance. Lower values mean distant sounds are louder. 1.0 is the physically correct value.");
@@ -183,8 +161,9 @@ public class Config {
 
 		if (this.forgeConfig.hasChanged()) {
 			this.forgeConfig.save();
-			SoundPhysics.applyConfigChanges();
+			return true;
 		}
+		return false;
 	}
 
 }
